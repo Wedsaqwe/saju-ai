@@ -204,7 +204,32 @@ export default function SajuApp(){
   const[savedYear,setSavedYear]=useState("");
   const[savedName2,setSavedName2]=useState("");
   const[savedYear2,setSavedYear2]=useState("");
-  const[pendingAction,setPendingAction]=useState(null); // "astro"|"integrated"|"mbti"|"face"|null
+  const[pendingAction,setPendingAction]=useState(null);
+  const[freeCount,setFreeCount]=useState(0);
+  const[limitModal,setLimitModal]=useState(false);
+  const FREE_LIMIT=3; // 하루 무료 분석 횟수
+
+  // 일일 무료 횟수 추적 (localStorage)
+  useEffect(()=>{
+    try{
+      const data=JSON.parse(localStorage.getItem("saju_free")||"{}");
+      const today=new Date().toISOString().slice(0,10);
+      if(data.date===today){setFreeCount(data.count||0)}
+      else{localStorage.setItem("saju_free",JSON.stringify({date:today,count:0}));setFreeCount(0)}
+    }catch(e){setFreeCount(0)}
+  },[]);
+
+  function useFreeCount(){
+    try{
+      const today=new Date().toISOString().slice(0,10);
+      const next=freeCount+1;
+      localStorage.setItem("saju_free",JSON.stringify({date:today,count:next}));
+      setFreeCount(next);
+      return true;
+    }catch(e){return true}
+  }
+
+  function canUseFree(){return prem||freeCount<FREE_LIMIT} // "astro"|"integrated"|"mbti"|"face"|null
 
   const loadMsgs=["사주를 펼칩니다","천간의 기운을 읽습니다","오행을 살핍니다","별자리를 읽습니다","동서양을 융합합니다"];
   useEffect(()=>{if(pg==="splash"){const t=setTimeout(()=>setPg("home"),1800);return()=>clearTimeout(t)}},[pg]);
@@ -218,6 +243,11 @@ export default function SajuApp(){
   function readForm2(){const n=name2Ref.current?.value||"",y=year2Ref.current?.value||"";setSavedName2(n);setSavedYear2(y);return{name:n,year:y}}
 
   async function run(m){
+    // 무료 분석일 때 횟수 체크
+    if(m==="basic"&&!prem){
+      if(!canUseFree()){setLimitModal(true);return}
+      useFreeCount();
+    }
     const{name,year,question}=readForm();if(!year||!month||!day||!gender)return;
     const h=hourFromSijin(sijin),s=mkSaju(+year,+month,+day,h),o=cntOH(s);
     setSaju(s);setOh(o);setPg("loading");setLoading(true);setMode(m);
@@ -248,9 +278,9 @@ export default function SajuApp(){
     setRd(text);setCh([{role:"assistant",content:text}]);setPg("result");setTab("result");setLoading(false);setNT("result");
   }
 
-  async function doChat(){const val=chatRef.current?.value||"";if(!val.trim()||chatLoading)return;const msg=val.trim();chatRef.current.value="";setCh(p=>[...p,{role:"user",content:msg}]);setChatLoading(true);const msgs=[...ch,{role:"user",content:msg}].map(m=>({role:m.role,content:m.content}));const text=await callAI(`${SYS}\n사주:${saju?sStr(saju):""} 기반 답변. 마크다운. 500자 이내.`,msgs,2000);setCh(p=>[...p,{role:"assistant",content:text}]);setChatLoading(false)}
+  async function doChat(){if(!prem){setLimitModal(true);return}const val=chatRef.current?.value||"";if(!val.trim()||chatLoading)return;const msg=val.trim();chatRef.current.value="";setCh(p=>[...p,{role:"user",content:msg}]);setChatLoading(true);const msgs=[...ch,{role:"user",content:msg}].map(m=>({role:m.role,content:m.content}));const text=await callAI(`${SYS}\n사주:${saju?sStr(saju):""} 기반 답변. 마크다운. 500자 이내.`,msgs,2000);setCh(p=>[...p,{role:"assistant",content:text}]);setChatLoading(false)}
   async function doDaily(){if(!saju||dailyLoading)return;setDailyLoading(true);const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}`;const text=await callAI(PR_DAILY,[{role:"user",content:u}],2000);setDailyRd(text);setDailyLoading(false)}
-  async function doCat(cat){if(!saju)return;setCatLoading(true);setCatName(cat.label);setPg("category");setNT("category");const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}\n성별:${gender}\n${cat.label} 상세 분석`;const text=await callAI(PR_CAT.replace("{CAT}",cat.label),[{role:"user",content:u}],2500);setCatRd(text);setCatLoading(false)}
+  async function doCat(cat){if(!saju)return;if(!prem){if(!canUseFree()){setLimitModal(true);return}useFreeCount()}setCatLoading(true);setCatName(cat.label);setPg("category");setNT("category");const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}\n성별:${gender}\n${cat.label} 상세 분석`;const text=await callAI(PR_CAT.replace("{CAT}",cat.label),[{role:"user",content:u}],2500);setCatRd(text);setCatLoading(false)}
 
   function doTarot(){const picked=[...TAROT].sort(()=>Math.random()-.5).slice(0,3);setTCards(picked);setTFlip([false,false,false]);setTRd("");setPg("tarot");setNT("tarot")}
   function flipTarot(i){if(tFlip[i])return;const nf=[...tFlip];nf[i]=true;setTFlip(nf);if(nf.every(Boolean)&&saju){setTLoading(true);const u=`사주:${sStr(saju)}\n카드:\n과거:${tCards[0].kr}\n현재:${tCards[1].kr}\n미래:${tCards[2].kr}`;const sys=PR_TAROT.replace("{C1}",tCards[0].kr).replace("{C2}",tCards[1].kr).replace("{C3}",tCards[2].kr);callAI(sys,[{role:"user",content:u}],2000).then(t=>{setTRd(t);setTLoading(false)})}}
@@ -318,12 +348,34 @@ export default function SajuApp(){
         </Card>
       </div>}
 
+      {/* FREE LIMIT MODAL */}
+      {limitModal&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",backdropFilter:"blur(12px)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setLimitModal(false)}>
+        <Card style={{maxWidth:360,width:"100%",textAlign:"center",padding:"32px 24px"}} onClick={e=>e.stopPropagation()}>
+          <div style={{fontSize:28,marginBottom:10}}>🔒</div>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:"0 0 8px",letterSpacing:"-0.03em"}}>오늘의 무료 분석을 모두 사용했어요</h2>
+          <p style={{fontSize:13,color:T.sub,margin:"0 0 20px",lineHeight:1.6}}>하루 {FREE_LIMIT}회 무료 분석이 제공됩니다.<br/>프리미엄으로 업그레이드하면 모든 기능을<br/>무제한으로 이용할 수 있어요.</p>
+          <div style={{background:T.surface,borderRadius:12,padding:"14px 16px",marginBottom:20,textAlign:"left"}}>
+            {["무제한 사주·점성술 분석","동서양 통합 리포트","AI 사진 관상 분석","무제한 추가 질문","분기별 + 10년 대운"].map((f,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4,fontSize:13,color:T.sub}}><span style={{color:T.green,fontSize:11}}>✓</span>{f}</div>)}
+          </div>
+          <div style={{marginBottom:16}}><span style={{fontSize:14,color:T.dim,textDecoration:"line-through",marginRight:8}}>₩4,900</span><span style={{fontSize:28,fontWeight:800,color:"#fff"}}>₩990</span></div>
+          <Btn primary onClick={()=>{setPrem(true);setLimitModal(false)}} style={{width:"100%",borderRadius:14,marginBottom:8}}>프리미엄 시작하기</Btn>
+          <p style={{fontSize:11,color:T.dim,margin:0}}>내일 자정에 무료 횟수가 초기화됩니다</p>
+        </Card>
+      </div>}
+
       {/* ═══ HOME ═══ */}
       {pg==="home"&&<div style={{...page,paddingTop:52}}>
         <div style={{textAlign:"center",marginBottom:40}}>
           <div style={{fontSize:13,letterSpacing:".06em",color:T.dim,fontWeight:600,marginBottom:6}}>AI SAJU</div>
           <h1 style={{fontSize:32,fontWeight:800,color:"#fff",margin:0,letterSpacing:"-0.04em"}}>사주명리</h1>
           <p style={{fontSize:14,color:T.dim,marginTop:4}}>동서양 융합 운명 분석</p>
+          {!prem&&<div style={{marginTop:10,display:"inline-flex",alignItems:"center",gap:6,padding:"4px 14px",borderRadius:50,background:T.surface,border:`1px solid ${T.border}`}}>
+            <span style={{fontSize:11,color:freeCount>=FREE_LIMIT?T.pink:T.sub}}>오늘 무료 {FREE_LIMIT-freeCount}회 남음</span>
+            {freeCount>=FREE_LIMIT&&<span style={{fontSize:10,color:T.purple,fontWeight:600,cursor:"pointer"}} onClick={()=>setPw(true)}>프리미엄 →</span>}
+          </div>}
+          {prem&&<div style={{marginTop:10,display:"inline-flex",alignItems:"center",gap:4,padding:"4px 14px",borderRadius:50,background:`${T.purple}12`,border:`1px solid ${T.purple}20`}}>
+            <span style={{fontSize:11,color:T.purple,fontWeight:600}}>✦ PREMIUM</span>
+          </div>}
         </div>
 
         {hasSaju&&<Card style={{marginBottom:12,cursor:"pointer",padding:"16px 18px"}} onClick={()=>{if(!dailyRd)doDaily();setPg("daily");setNT("daily")}}>

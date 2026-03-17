@@ -165,15 +165,15 @@ async function callAI(sys,msgs,mt=4000){
 
 /* ═══ PROMPTS ═══ */
 const SYS=`당신은 40년 경력의 대한민국 최고 사주명리학 대가입니다. 전통 명리학(격국론,용신론,십성론,신살론,합충형파해,대운·세운)에 정통하며 현대적이고 따뜻한 "~해요" 체로 풀이합니다. 한자 용어에 쉬운 설명을 반드시 병기합니다.`;
-const PR_BASIC=SYS+`\n\n기본 분석(마크다운,900자):\n# {NAME}님의 사주 풀이\n## 🔮 사주 구성\n## ⚖️ 오행 균형과 용신\n## 🌟 타고난 기질\n## 📅 2026년 병오년\n## 💡 조언`;
+const PR_BASIC=SYS+`\n\n기본 분석(마크다운,2000자 이상 상세히):\n# {NAME}님의 사주 풀이\n\n## 🔮 사주 구성과 핵심 해석\n(일간의 의미, 각 기둥별 관계를 풍부하게 설명)\n\n## ⚖️ 오행 균형과 용신\n(어떤 오행이 강하고 약한지, 용신이 무엇이고 왜 그런지 구체적으로)\n\n## 🌟 타고난 기질과 성격\n(강점 3가지와 주의할 점 2가지를 구체적 예시와 함께)\n\n## 💼 적성과 재능\n(어울리는 직업군과 재능 발휘 방향)\n\n## 📅 2026년 병오년 운세\n(올해 전체 흐름과 주요 전환 시기를 구체적으로)\n\n## 🍀 행운 포인트\n(행운의 색, 숫자, 방위, 음식을 근거와 함께)\n\n## 💡 인생 조언 3가지\n(실천 가능한 구체적 조언)\n\n반드시 2000자 이상 상세하게 작성. 각 섹션마다 최소 3~4문장. 구체적 예시와 비유를 활용.`;
 const PR_PREMIUM=SYS+`\n\n프리미엄 상세 분석(마크다운,3000자+):\n# {NAME}님의 프리미엄 분석\n## 🔮 사주 심층 해석\n## ⚖️ 오행 & 용신\n## 🌟 성격·재능\n## 💰 재물운\n## 💼 직업운\n## 💕 연애운\n## 🏥 건강운\n## 📅 2026년 분기별\n### 1~3월\n### 4~6월\n### 7~9월\n### 10~12월\n## 🔄 10년 대운\n## 🎯 인생 조언 TOP 5`;
 const PR_COMPAT=SYS+`\n\n궁합(마크다운):\n# {N1} ♥ {N2}\n## 💕 궁합 점수: [XX]/100\n## 🔮 두 사주의 관계\n## 💪 강점 3가지\n## ⚠️ 주의점 3가지\n## 💡 궁합 높이는 법\n## 📅 2026 관계 운세`;
-const PR_DAILY=SYS+`\n\n오늘(2026.3.17 화)의 운세(마크다운,500자):\n# ✨ 오늘의 운세\n## 총운\n## 행운 포인트\n- 🎨 행운의 색\n- 🔢 행운의 숫자\n- 🧭 방위\n- 🍽 음식\n## ⏰ 시간대별\n## 💡 한마디`;
-const PR_CAT=SYS+`\n\n{CAT} 상세 분석(마크다운,800자). 구체적 시기, 실천법 포함.`;
-const PR_TAROT=SYS+`\n\n사주 기반 타로 해석(마크다운,700자):\n# 🎴 타로 리딩\n## 과거 — {C1}\n## 현재 — {C2}\n## 미래 — {C3}\n## 🔮 종합 메시지`;
+const PR_DAILY=SYS+`\n\n오늘(2026.3.17 화)의 운세(마크다운,800자 이상 상세히):\n# ✨ 오늘의 운세\n## 총운\n(오늘 하루 전체 기운을 3~4문장으로)\n## 행운 포인트\n- 🎨 행운의 색 (이유 포함)\n- 🔢 행운의 숫자 (이유 포함)\n- 🧭 좋은 방위\n- 🍽 행운의 음식\n## ⏰ 시간대별 운세\n(오전/오후/저녁 각각 구체적으로)\n## 주의할 점\n## 💡 오늘의 한마디`;
+const PR_CAT=SYS+`\n\n{CAT} 상세 분석(마크다운,1500자 이상). 구체적 시기, 실천법, 주의사항, 조언을 포함. 각 항목별 3~4문장 이상 상세하게.`;
+const PR_TAROT=SYS+`\n\n사주 기반 타로 해석(마크다운,1200자 이상):\n# 🎴 타로 리딩\n## 과거 — {C1}\n(이 카드가 사주 기반으로 어떤 과거를 의미하는지 3~4문장)\n## 현재 — {C2}\n(현재 상황과 카드의 연결점을 구체적으로)\n## 미래 — {C3}\n(앞으로의 흐름과 주의점)\n## 🔮 종합 메시지\n(세 카드를 관통하는 핵심 메시지와 실천 조언)\n## 💡 타로가 전하는 한마디`;
 
 /* v4 신규 프롬프트 */
-const PR_ASTRO=`당신은 서양 점성술 전문가입니다. 태양 별자리, 원소(불/땅/공기/물), 지배 행성을 기반으로 분석합니다.\n마크다운으로 제공:\n# {SYMBOL} {SIGN} 분석\n## 기본 성향\n## 올해(2026) 행성 트랜짓 영향\n## 연애 & 궁합 좋은 별자리\n## 직업 & 재물\n## 건강 주의점\n## 이 별자리의 2026년 월별 포인트`;
+const PR_ASTRO=`당신은 서양 점성술 전문가입니다. 태양 별자리, 원소(불/땅/공기/물), 지배 행성을 기반으로 분석합니다.\n마크다운으로 2000자 이상 상세히 제공:\n# {SYMBOL} {SIGN} 분석\n## 기본 성향\n(3~4문장 이상, 구체적 성격 묘사)\n## 올해(2026) 행성 트랜짓 영향\n(목성, 토성 등 주요 행성의 영향을 구체적으로)\n## 연애 & 궁합 좋은 별자리\n(상위 3개 별자리와 이유)\n## 직업 & 재물\n(어울리는 직업군과 2026년 재물 흐름)\n## 건강 주의점\n(이 별자리가 특히 조심해야 할 건강 영역)\n## 이 별자리의 2026년 월별 포인트\n(분기별로 주요 이벤트와 조언)\n## 💡 별자리 전문가의 조언`;
 
 const PR_INTEGRATED=`당신은 동양 명리학과 서양 점성술을 모두 수련한 통합 역학자입니다.
 아래 세 가지 분석 결과를 교차 검증하여 통합 리포트를 작성하세요.
@@ -450,7 +450,7 @@ export default function SajuApp(){
     setMbti(mb);
     const u=`이름:${name||"회원"}\n성별:${gender}\n생년월일:${year}년 ${month}월 ${day}일\n${sijin?`시:${시진표.find(x=>x.지===sijin)?.설명||""}`:""}\n사주:${sStr(s)}\n일간:${s.일주.간}(${OH_G[s.일주.간]})\n오행:${Object.entries(o).map(([k,v])=>`${OHK[k]}:${v}`).join(",")}\n띠:${DDI[s.년주.지]}\n나이:만${2026-(+year)}세\n${question?`질문:${question}`:""}`;
     const sys=(m==="premium"?PR_PREMIUM:PR_BASIC).replace("{NAME}",name||"회원");
-    const text=await callAI(sys,[{role:"user",content:u}],m==="premium"?4000:2000);
+    const text=await callAI(sys,[{role:"user",content:u}],m==="premium"?4000:3000);
     setRd(text); setCh([{role:"assistant",content:text}]); setPg("result"); setTab("result"); setLoading(false); setNT("result");
   }
 
@@ -486,7 +486,7 @@ export default function SajuApp(){
   async function doDaily(){
     if(!saju||dailyLoading)return; setDailyLoading(true);
     const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}`;
-    const text=await callAI(PR_DAILY,[{role:"user",content:u}],1200);
+    const text=await callAI(PR_DAILY,[{role:"user",content:u}],2000);
     setDailyRd(text); setDailyLoading(false);
   }
 
@@ -494,7 +494,7 @@ export default function SajuApp(){
   async function doCat(cat){
     if(!saju)return; setCatLoading(true); setCatName(cat.label); setPg("category"); setNT("category");
     const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}\n성별:${gender}\n${cat.label} 상세 분석`;
-    const text=await callAI(PR_CAT.replace("{CAT}",cat.label),[{role:"user",content:u}],2000);
+    const text=await callAI(PR_CAT.replace("{CAT}",cat.label),[{role:"user",content:u}],2500);
     setCatRd(text); setCatLoading(false);
   }
 
@@ -509,7 +509,7 @@ export default function SajuApp(){
       setTLoading(true);
       const u=`사주:${sStr(saju)}\n카드:\n과거:${tCards[0].kr}\n현재:${tCards[1].kr}\n미래:${tCards[2].kr}`;
       const sys=PR_TAROT.replace("{C1}",tCards[0].kr).replace("{C2}",tCards[1].kr).replace("{C3}",tCards[2].kr);
-      callAI(sys,[{role:"user",content:u}],1500).then(t=>{setTRd(t);setTLoading(false)});
+      callAI(sys,[{role:"user",content:u}],2000).then(t=>{setTRd(t);setTLoading(false)});
     }
   }
 

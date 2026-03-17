@@ -274,7 +274,7 @@ export default function SajuV2(){
   const[saju,setSaju]=useState(null);const[saju2,setSaju2]=useState(null);
   const[oh,setOh]=useState(null);const[oh2,setOh2]=useState(null);
   const[rd,sRd]=useState("");const[ld,sLd]=useState(false);
-  const[ch,sCH]=useState([]);const[fu,sFU]=useState("");const[cl,sCL]=useState(false);
+  const[ch,sCH]=useState([]);const[fu,sFU]=useState("");const[localChat,setLocalChat]=useState("");const[cl,sCL]=useState(false);
   const[tab,setTab]=useState("result");const[pw,sPW]=useState(false);
   const[mode,setMode]=useState("basic");const[prem,sPrem]=useState(false);
   const[li,sLI]=useState(0);const[navTab,setNT]=useState("home");
@@ -323,7 +323,7 @@ export default function SajuV2(){
   };
 
   const doChat=async()=>{
-    if(!fu.trim()||cl)return;const msg=fu.trim();sFU("");
+    if(!fu.trim()||cl)return;const msg=fu.trim();sFU("");setLocalChat("");
     sCH(p=>[...p,{role:"user",content:msg}]);sCL(true);
     const msgs=ch.map(m=>({role:m.role,content:m.content}));msgs.push({role:"user",content:msg});
     const text=await callAI(`${SYS}\n이 사람의 사주:${saju?sStr(saju):""}, 일간:${saju?.일주?.간||""}\n위 사주를 기반으로 추가 질문에 마크다운으로 답변하세요. 500자 이내.`,msgs,2000);
@@ -381,14 +381,18 @@ export default function SajuV2(){
   /* ═══ PersonForm ═══ */
   function PF({idx,n,sn,g,sg,y,sy,m,sm,d,sd,sj,ssj,showSijin=true}){
     const inp={width:"100%",padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box"};
+    const[localName,setLocalName]=useState(n);
+    const[localYear,setLocalYear]=useState(y);
+    useEffect(()=>{setLocalName(n)},[n]);
+    useEffect(()=>{setLocalYear(y)},[y]);
     return<div style={{display:"flex",flexDirection:"column",gap:"14px"}}>
       {idx&&<div style={{fontSize:"10px",color:"#A78BFA",fontWeight:600,letterSpacing:"2px"}}>{idx}</div>}
-      <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>이름</label><input value={n} onChange={e=>sn(e.target.value)} placeholder="이름" style={inp}/></div>
+      <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>이름</label><input value={localName} onChange={e=>setLocalName(e.target.value)} onBlur={e=>sn(e.target.value)} onCompositionEnd={e=>sn(e.target.value)} placeholder="이름" style={inp}/></div>
       <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>성별</label>
         <div style={{display:"flex",gap:"8px"}}>{["남","여"].map(v=><button key={v} onClick={()=>sg(v)} style={{flex:1,padding:"10px",borderRadius:"10px",border:g===v?"1px solid #A78BFA":"1px solid rgba(167,139,250,0.12)",background:g===v?"rgba(167,139,250,0.1)":"transparent",color:g===v?"#E0D4FF":"#4A4060",fontSize:"13px",cursor:"pointer",fontWeight:g===v?600:400}}>{v}</button>)}</div>
       </div>
       <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>생년월일</label>
-        <div style={{display:"flex",gap:"6px"}}><input value={y} onChange={e=>sy(e.target.value)} placeholder="1990" maxLength={4} style={{...inp,flex:2}}/><select value={m} onChange={e=>sm(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">월</option>{Array.from({length:12},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select><select value={d} onChange={e=>sd(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">일</option>{Array.from({length:31},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select></div>
+        <div style={{display:"flex",gap:"6px"}}><input value={localYear} onChange={e=>setLocalYear(e.target.value)} onBlur={e=>sy(e.target.value)} placeholder="1990" maxLength={4} style={{...inp,flex:2}}/><select value={m} onChange={e=>sm(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">월</option>{Array.from({length:12},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select><select value={d} onChange={e=>sd(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">일</option>{Array.from({length:31},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select></div>
       </div>
       {showSijin&&<div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"6px",fontWeight:500}}>태어난 시 <span style={{color:"#3A3454"}}>(십이시진)</span></label><SijinPicker value={sj} onChange={ssj}/></div>}
     </div>;
@@ -491,7 +495,7 @@ export default function SajuV2(){
         <div style={{textAlign:"center",marginBottom:"18px"}}><span style={{fontSize:"20px"}}>🔮</span><h2 style={{fontSize:"24px",fontWeight:700,color:"#fff",margin:"4px 0 2px"}}>내 사주</h2><p style={{fontSize:"13px",color:"#4A4060",margin:0}}>정확한 정보를 입력할수록 분석이 정밀해져요</p></div>
         <G><PF n={nm} sn={sNm} g={gd} sg={sGd} y={by} sy={sBY} m={bm} sm={sBM} d={bd} sd={sBD} sj={selectedSijin} ssj={setSijin}/>
           <div style={{marginTop:"12px"}}><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px"}}>궁금한 점 <span style={{color:"#3A3454"}}>(선택)</span></label>
-            <textarea value={q} onChange={e=>sQ(e.target.value)} placeholder="예: 올해 이직 타이밍이 궁금합니다" rows={2} style={{width:"100%",padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box",resize:"vertical",lineHeight:1.5}}/></div>
+            <textarea defaultValue={q} onBlur={e=>sQ(e.target.value)} onCompositionEnd={e=>sQ(e.target.value)} placeholder="예: 올해 이직 타이밍이 궁금합니다" rows={2} style={{width:"100%",padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box",resize:"vertical",lineHeight:1.5}}/></div>
         </G>
         <div style={{display:"flex",gap:"8px",marginTop:"12px"}}>
           <button onClick={()=>run("basic")} disabled={!canGo} style={{flex:1,padding:"13px",borderRadius:"12px",border:"1px solid rgba(167,139,250,.15)",background:"transparent",color:canGo?"#A78BFA":"#2A2540",fontSize:"13px",fontWeight:600,cursor:canGo?"pointer":"not-allowed"}}>무료 분석</button>
@@ -614,7 +618,7 @@ export default function SajuV2(){
 
         {tab==="chat"&&<G style={{minHeight:"160px"}}>
           <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"12px",justifyContent:"center"}}>
-            {["이직 시기","재물운","연애운","건강 주의점","내년 운세","궁합 좋은 띠"].map(t=><button key={t} onClick={()=>sFU(t+"이 궁금해요")} style={{padding:"5px 10px",borderRadius:"14px",border:"1px solid rgba(167,139,250,.08)",background:"transparent",color:"#6B5F8A",fontSize:"12px",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.25)"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.08)"}>{t}</button>)}
+            {["이직 시기","재물운","연애운","건강 주의점","내년 운세","궁합 좋은 띠"].map(t=><button key={t} onClick={()=>{sFU(t+"이 궁금해요");setLocalChat(t+"이 궁금해요")}} style={{padding:"5px 10px",borderRadius:"14px",border:"1px solid rgba(167,139,250,.08)",background:"transparent",color:"#6B5F8A",fontSize:"12px",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.25)"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.08)"}>{t}</button>)}
           </div>
           {ch.slice(1).map((m,i)=><div key={i} style={{marginBottom:"10px"}}>
             {m.role==="user"&&<div style={{background:"rgba(167,139,250,.05)",borderRadius:"8px",padding:"8px 10px",borderLeft:"2px solid #A78BFA",marginBottom:"6px"}}><p style={{margin:0,color:"#E0D4FF",fontSize:"12px"}}>{m.content}</p></div>}
@@ -643,7 +647,7 @@ export default function SajuV2(){
 
         {tab==="chat"&&<div style={{position:"fixed",bottom:"72px",left:0,right:0,background:"linear-gradient(transparent,#0B0A1A 40%)",padding:"12px 16px 12px",zIndex:10}}>
           <div style={{maxWidth:"480px",margin:"0 auto",display:"flex",gap:"6px"}}>
-            <input value={fu} onChange={e=>sFU(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doChat()} placeholder="질문을 입력하세요" style={{flex:1,padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box"}}/>
+            <input value={localChat} onChange={e=>{setLocalChat(e.target.value);if(!e.nativeEvent.isComposing)sFU(e.target.value)}} onCompositionEnd={e=>{sFU(e.target.value);setLocalChat(e.target.value)}} onKeyDown={e=>{if(e.key==="Enter"&&!e.nativeEvent.isComposing){sFU(localChat);setTimeout(doChat,50)}}} placeholder="질문을 입력하세요" style={{flex:1,padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box"}}/>
             <button onClick={doChat} disabled={cl||!fu.trim()} style={{padding:"11px 16px",borderRadius:"10px",border:"none",background:fu.trim()?"linear-gradient(135deg,#A78BFA,#7C5CFC)":"#1E1A30",color:fu.trim()?"#fff":"#2A2540",fontSize:"12px",fontWeight:600,cursor:fu.trim()?"pointer":"not-allowed",whiteSpace:"nowrap"}}>질문</button>
           </div>
         </div>}

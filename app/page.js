@@ -204,6 +204,7 @@ export default function SajuApp(){
   const[savedYear,setSavedYear]=useState("");
   const[savedName2,setSavedName2]=useState("");
   const[savedYear2,setSavedYear2]=useState("");
+  const[pendingAction,setPendingAction]=useState(null); // "astro"|"integrated"|"mbti"|"face"|null
 
   const loadMsgs=["사주를 펼칩니다","천간의 기운을 읽습니다","오행을 살핍니다","별자리를 읽습니다","동서양을 융합합니다"];
   useEffect(()=>{if(pg==="splash"){const t=setTimeout(()=>setPg("home"),1800);return()=>clearTimeout(t)}},[pg]);
@@ -224,7 +225,16 @@ export default function SajuApp(){
     const u=`이름:${name||"회원"}\n성별:${gender}\n생년월일:${year}년 ${month}월 ${day}일\n${sijin?`시:${시진표.find(x=>x.지===sijin)?.설명||""}`:""}\n사주:${sStr(s)}\n일간:${s.일주.간}(${OH_G[s.일주.간]})\n오행:${Object.entries(o).map(([k,v])=>`${OHK[k]}:${v}`).join(",")}\n띠:${DDI[s.년주.지]}\n나이:만${2026-(+year)}세\n${question?`질문:${question}`:""}`;
     const sys=(m==="premium"?PR_PREMIUM:PR_BASIC).replace("{NAME}",name||"회원");
     const text=await callAI(sys,[{role:"user",content:u}],m==="premium"?4000:3000);
-    setRd(text);setCh([{role:"assistant",content:text}]);setPg("result");setTab("result");setLoading(false);setNT("result");
+    setRd(text);setCh([{role:"assistant",content:text}]);setLoading(false);
+    // pendingAction이 있으면 해당 기능으로 이동, 없으면 결과 페이지
+    if(pendingAction){
+      const action=pendingAction;setPendingAction(null);
+      if(action==="astro"){doAstro();return}
+      if(action==="integrated"){doIntegrated();return}
+      if(action==="mbti"){setPg("mbtiResult");setNT("mbti");return}
+      if(action==="face"){setPg("faceMenu");setNT("face");return}
+    }
+    setPg("result");setTab("result");setNT("result");
   }
 
   async function runCompat(){
@@ -339,12 +349,12 @@ export default function SajuApp(){
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {[
             {emoji:"🔮",title:"사주 분석",desc:"종합 사주명리 분석",fn:()=>setPg("input")},
-            {emoji:"⭐",title:"점성술",desc:"서양 별자리 운세",badge:"NEW",bc:T.gold,fn:()=>{if(hasSaju)doAstro();else setPg("input")}},
-            {emoji:"🌌",title:"통합 리포트",desc:"사주 × 점성술 × MBTI",badge:"PREMIUM",bc:T.purple2,fn:()=>{if(hasSaju){if(prem)doIntegrated();else setPw(true)}else setPg("input")}},
+            {emoji:"⭐",title:"점성술",desc:"서양 별자리 운세",badge:"NEW",bc:T.gold,fn:()=>{if(hasSaju)doAstro();else{setPendingAction("astro");setPg("input")}}},
+            {emoji:"🌌",title:"통합 리포트",desc:"사주 × 점성술 × MBTI",badge:"PREMIUM",bc:T.purple2,fn:()=>{if(hasSaju){if(prem)doIntegrated();else setPw(true)}else{setPendingAction("integrated");setPg("input")}}},
             {emoji:"💫",title:"궁합",desc:"두 사람의 궁합 분석",fn:()=>setPg("compat")},
             ...(hasSaju?[{emoji:"🎴",title:"타로 카드",desc:"3카드 리딩",fn:doTarot}]:[]),
-            {emoji:"👤",title:"AI 관상",desc:"사주 / 사진 관상 분석",badge:"NEW",bc:T.green,fn:()=>{if(hasSaju)setPg("faceMenu");else setPg("input")}},
-            {emoji:"🧠",title:"사주 MBTI",desc:"오행 기반 MBTI 추정",badge:"NEW",bc:T.blue,fn:()=>{if(hasSaju)setPg("mbtiResult");else setPg("input")}},
+            {emoji:"👤",title:"AI 관상",desc:"사주 / 사진 관상 분석",badge:"NEW",bc:T.green,fn:()=>{if(hasSaju)setPg("faceMenu");else{setPendingAction("face");setPg("input")}}},
+            {emoji:"🧠",title:"사주 MBTI",desc:"오행 기반 MBTI 추정",badge:"NEW",bc:T.blue,fn:()=>{if(hasSaju)setPg("mbtiResult");else{setPendingAction("mbti");setPg("input")}}},
           ].map((item,i)=><Card key={i} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:"16px 18px"}} onClick={item.fn}>
             <div style={{width:40,height:40,borderRadius:12,background:T.surface,border:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{item.emoji}</div>
             <div style={{flex:1}}>
@@ -533,8 +543,8 @@ export default function SajuApp(){
           {[
             {k:"home",icon:"🏠",l:"홈",fn:()=>{setPg("home");setNT("home")}},
             {k:"saju",icon:"🔮",l:"사주",fn:()=>{setPg("input");setNT("saju")}},
-            {k:"astro",icon:"⭐",l:"점성술",fn:()=>{if(hasSaju)doAstro();else{setPg("input");setNT("saju")}}},
-            {k:"integrated",icon:"🌌",l:"통합",fn:()=>{if(hasSaju){if(prem)doIntegrated();else setPw(true)}else{setPg("input");setNT("saju")}}},
+            {k:"astro",icon:"⭐",l:"점성술",fn:()=>{if(hasSaju)doAstro();else{setPendingAction("astro");setPg("input");setNT("saju")}}},
+            {k:"integrated",icon:"🌌",l:"통합",fn:()=>{if(hasSaju){if(prem)doIntegrated();else setPw(true)}else{setPendingAction("integrated");setPg("input");setNT("saju")}}},
             {k:"result",icon:"📊",l:"결과",fn:()=>{if(rd){setPg("result");setNT("result")}else{setPg("input");setNT("saju")}}}
           ].map(t=><button key={t.k} onClick={t.fn} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:1,padding:"5px 12px",color:navTab===t.k?T.purple:T.dim,fontSize:10}}>
             <span style={{fontSize:20,opacity:navTab===t.k?1:.35}}>{t.icon}</span>

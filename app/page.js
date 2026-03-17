@@ -533,8 +533,8 @@ export default function SajuApp(){
           {[
             {k:"home",icon:"🏠",l:"홈",fn:()=>{setPg("home");setNT("home")}},
             {k:"saju",icon:"🔮",l:"사주",fn:()=>{setPg("input");setNT("saju")}},
+            {k:"astro",icon:"⭐",l:"점성술",fn:()=>{if(hasSaju)doAstro();else{setPg("input");setNT("saju")}}},
             {k:"integrated",icon:"🌌",l:"통합",fn:()=>{if(hasSaju){if(prem)doIntegrated();else setPw(true)}else{setPg("input");setNT("saju")}}},
-            {k:"tarot",icon:"🎴",l:"타로",fn:()=>{if(hasSaju)doTarot();else{setPg("input");setNT("saju")}}},
             {k:"result",icon:"📊",l:"결과",fn:()=>{if(rd){setPg("result");setNT("result")}else{setPg("input");setNT("saju")}}}
           ].map(t=><button key={t.k} onClick={t.fn} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:1,padding:"5px 12px",color:navTab===t.k?T.purple:T.dim,fontSize:10}}>
             <span style={{fontSize:20,opacity:navTab===t.k?1:.35}}>{t.icon}</span>

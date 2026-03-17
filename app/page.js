@@ -255,48 +255,6 @@ function TarotCard({card,flipped,onClick,delay}){
 }
 
 
-/* ═══ Korean IME Safe Input ═══ */
-function KInput({value,onValueChange,placeholder,style,maxLength,type="text"}){
-  const ref=useRef(null);
-  const composingRef=useRef(false);
-  const handleChange=(e)=>{
-    if(!composingRef.current){
-      onValueChange(e.target.value);
-    }
-  };
-  const handleCompositionStart=()=>{composingRef.current=true};
-  const handleCompositionEnd=(e)=>{
-    composingRef.current=false;
-    onValueChange(e.target.value);
-  };
-  useEffect(()=>{
-    if(ref.current&&!composingRef.current&&ref.current!==document.activeElement){
-      ref.current.value=value;
-    }
-  },[value]);
-  return<input ref={ref} defaultValue={value} onChange={handleChange} onCompositionStart={handleCompositionStart} onCompositionEnd={handleCompositionEnd} placeholder={placeholder} style={style} maxLength={maxLength} type={type}/>;
-}
-function KTextarea({value,onValueChange,placeholder,style,rows}){
-  const ref=useRef(null);
-  const composingRef=useRef(false);
-  const handleChange=(e)=>{
-    if(!composingRef.current){
-      onValueChange(e.target.value);
-    }
-  };
-  const handleCompositionStart=()=>{composingRef.current=true};
-  const handleCompositionEnd=(e)=>{
-    composingRef.current=false;
-    onValueChange(e.target.value);
-  };
-  useEffect(()=>{
-    if(ref.current&&!composingRef.current&&ref.current!==document.activeElement){
-      ref.current.value=value;
-    }
-  },[value]);
-  return<textarea ref={ref} defaultValue={value} onChange={handleChange} onCompositionStart={handleCompositionStart} onCompositionEnd={handleCompositionEnd} placeholder={placeholder} style={style} rows={rows}/>;
-}
-
 /* ═══ Stars BG ═══ */
 function Stars(){
   const s=Array.from({length:30},()=>({x:Math.random()*100,y:Math.random()*100,s:Math.random()*1.2+.3,d:Math.random()*5+2}));
@@ -328,7 +286,7 @@ export default function SajuV2(){
   // Tarot
   const[tCards,setTC]=useState([]);const[tFlip,setTF]=useState([false,false,false]);const[tRd,setTRd]=useState("");const[tLd,setTLd]=useState(false);
 
-  const cr=useRef(null);const chatInputRef=useRef(null);const chatComposing=useRef(false);
+  const cr=useRef(null);const chatInputRef=useRef(null);const chatComposing=useRef(false);const nameInputRef=useRef(null);const yearInputRef=useRef(null);const questionInputRef=useRef(null);const name2InputRef=useRef(null);const year2InputRef=useRef(null);
   const lm=["사주를 펼칩니다","천간의 기운을 읽습니다","지지의 흐름을 봅니다","오행을 살핍니다","용신을 찾습니다","대운을 읽습니다"];
 
   useEffect(()=>{if(pg==="splash"){const t=setTimeout(()=>setPg("home"),2000);return()=>clearTimeout(t)}},[pg]);
@@ -345,19 +303,31 @@ export default function SajuV2(){
   }
 
   const run=async(m)=>{
-    if(!canGo)return;
+    if(nameInputRef.current)sNm(nameInputRef.current.value);
+    if(yearInputRef.current)sBY(yearInputRef.current.value);
+    if(questionInputRef.current)sQ(questionInputRef.current.value);
+    const currentName=nameInputRef.current?.value||nm;
+    const currentYear=yearInputRef.current?.value||by;
+    const currentQ=questionInputRef.current?.value||q;
+    if(!currentYear||!bm||!bd||!gd)return;
     const h=getHourFromSijin(selectedSijin);
-    const s=mkSaju(+by,+bm,+bd,h),o=cntOH(s);
+    const s=mkSaju(+currentYear,+bm,+bd,h),o=cntOH(s);
     setSaju(s);setOh(o);setPg("loading");sLd(true);setMode(m);
-    const u=`이름:${nm||"회원"}\n성별:${gd}\n생년월일:${by}년 ${bm}월 ${bd}일\n${selectedSijin?`태어난 시:${시진표.find(x=>x.지===selectedSijin)?.설명||""}(${JK[selectedSijin]}시)`:""}\n사주팔자:${sStr(s)}\n일간:${s.일주.간}(${GK[s.일주.간]})—${OH_G[s.일주.간]}(${OHK[OH_G[s.일주.간]]})\n오행분포:${Object.entries(o).map(([k,v])=>`${OHK[k]}:${v}`).join(", ")}\n띠:${DDI[s.년주.지]}(${DDI_E[s.년주.지]})\n나이:만 ${2026-(+by)}세\n${q?`특별히 궁금한 점:${q}`:"종합 분석을 해주세요."}`;
+    const u=`이름:${currentName||nm||"회원"}\n성별:${gd}\n생년월일:${by}년 ${bm}월 ${bd}일\n${selectedSijin?`태어난 시:${시진표.find(x=>x.지===selectedSijin)?.설명||""}(${JK[selectedSijin]}시)`:""}\n사주팔자:${sStr(s)}\n일간:${s.일주.간}(${GK[s.일주.간]})—${OH_G[s.일주.간]}(${OHK[OH_G[s.일주.간]]})\n오행분포:${Object.entries(o).map(([k,v])=>`${OHK[k]}:${v}`).join(", ")}\n띠:${DDI[s.년주.지]}(${DDI_E[s.년주.지]})\n나이:만 ${2026-(+by)}세\n${currentQ?`특별히 궁금한 점:${currentQ}`:"종합 분석을 해주세요."}`;
     const text=await callAI(PROMPTS[m==="premium"?"premium":"basic"].replace("{이름}",nm||"회원"),[{role:"user",content:u}],m==="premium"?4000:2000);
     sRd(text);sCH([{role:"assistant",content:text}]);setPg("result");setTab("result");sLd(false);setNT("result");
   };
 
   const runCompat=async()=>{
-    if(!by||!bm||!bd||!by2||!bm2||!bd2)return;
+    if(nameInputRef.current)sNm(nameInputRef.current.value);
+    if(yearInputRef.current)sBY(yearInputRef.current.value);
+    if(name2InputRef.current)sNm2(name2InputRef.current.value);
+    if(year2InputRef.current)sBY2(year2InputRef.current.value);
+    const y1=yearInputRef.current?.value||by;
+    const y2=year2InputRef.current?.value||by2;
+    if(!y1||!bm||!bd||!y2||!bm2||!bd2)return;
     const h1=getHourFromSijin(selectedSijin),h2=getHourFromSijin(sijin2);
-    const s1=mkSaju(+by,+bm,+bd,h1),s2=mkSaju(+by2,+bm2,+bd2,h2);
+    const s1=mkSaju(+y1,+bm,+bd,h1),s2=mkSaju(+y2,+bm2,+bd2,h2);
     setSaju(s1);setSaju2(s2);setOh(cntOH(s1));setOh2(cntOH(s2));setPg("loading");sLd(true);setMode("compat");
     const sys=PROMPTS.compat.replace(/\{n1\}/g,nm||"A").replace(/\{n2\}/g,nm2||"B");
     const u=`[첫번째]\n이름:${nm||"A"}, 성별:${gd}\n사주:${sStr(s1)}\n오행:${Object.entries(cntOH(s1)).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n\n[두번째]\n이름:${nm2||"B"}, 성별:${gd2}\n사주:${sStr(s2)}\n오행:${Object.entries(cntOH(s2)).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}`;
@@ -366,7 +336,7 @@ export default function SajuV2(){
   };
 
   const doChat=async()=>{
-    if(!fu.trim()||cl)return;const msg=fu.trim();sFU("");if(chatInputRef.current)chatInputRef.current.value="";
+    const chatVal=chatInputRef.current?.value||fu;if(!chatVal.trim()||cl)return;const msg=chatVal.trim();sFU("");if(chatInputRef.current)chatInputRef.current.value="";
     sCH(p=>[...p,{role:"user",content:msg}]);sCL(true);
     const msgs=ch.map(m=>({role:m.role,content:m.content}));msgs.push({role:"user",content:msg});
     const text=await callAI(`${SYS}\n이 사람의 사주:${saju?sStr(saju):""}, 일간:${saju?.일주?.간||""}\n위 사주를 기반으로 추가 질문에 마크다운으로 답변하세요. 500자 이내.`,msgs,2000);
@@ -422,16 +392,16 @@ export default function SajuV2(){
   }
 
   /* ═══ PersonForm ═══ */
-  function PF({idx,n,sn,g,sg,y,sy,m,sm,d,sd,sj,ssj,showSijin=true}){
+  function PF({idx,n,sn,g,sg,y,sy,m,sm,d,sd,sj,ssj,nameRef,yearRef,showSijin=true}){
     const inp={width:"100%",padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box"};
     return<div style={{display:"flex",flexDirection:"column",gap:"14px"}}>
       {idx&&<div style={{fontSize:"10px",color:"#A78BFA",fontWeight:600,letterSpacing:"2px"}}>{idx}</div>}
-      <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>이름</label><KInput value={n} onValueChange={sn} placeholder="이름" style={inp}/></div>
+      <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>이름</label><input ref={nameRef} defaultValue={n} placeholder="이름" style={inp}/></div>
       <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>성별</label>
         <div style={{display:"flex",gap:"8px"}}>{["남","여"].map(v=><button key={v} onClick={()=>sg(v)} style={{flex:1,padding:"10px",borderRadius:"10px",border:g===v?"1px solid #A78BFA":"1px solid rgba(167,139,250,0.12)",background:g===v?"rgba(167,139,250,0.1)":"transparent",color:g===v?"#E0D4FF":"#4A4060",fontSize:"13px",cursor:"pointer",fontWeight:g===v?600:400}}>{v}</button>)}</div>
       </div>
       <div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px",fontWeight:500}}>생년월일</label>
-        <div style={{display:"flex",gap:"6px"}}><KInput value={y} onValueChange={sy} placeholder="1990" maxLength={4} style={{...inp,flex:2}}/><select value={m} onChange={e=>sm(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">월</option>{Array.from({length:12},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select><select value={d} onChange={e=>sd(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">일</option>{Array.from({length:31},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select></div>
+        <div style={{display:"flex",gap:"6px"}}><input ref={yearRef} defaultValue={y} placeholder="1990" maxLength={4} style={{...inp,flex:2}}/><select value={m} onChange={e=>sm(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">월</option>{Array.from({length:12},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select><select value={d} onChange={e=>sd(e.target.value)} style={{...inp,flex:1,appearance:"none"}}><option value="">일</option>{Array.from({length:31},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select></div>
       </div>
       {showSijin&&<div><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"6px",fontWeight:500}}>태어난 시 <span style={{color:"#3A3454"}}>(십이시진)</span></label><SijinPicker value={sj} onChange={ssj}/></div>}
     </div>;
@@ -532,9 +502,9 @@ export default function SajuV2(){
       {pg==="input"&&<div style={{maxWidth:"420px",margin:"0 auto",padding:"24px 20px 40px",position:"relative",zIndex:1,animation:"fadeIn .3s"}}>
         <button onClick={()=>{setPg("home");setNT("home")}} style={{background:"none",border:"none",color:"#3A3454",cursor:"pointer",fontSize:"11px",marginBottom:"14px"}}>← 돌아가기</button>
         <div style={{textAlign:"center",marginBottom:"18px"}}><span style={{fontSize:"20px"}}>🔮</span><h2 style={{fontSize:"24px",fontWeight:700,color:"#fff",margin:"4px 0 2px"}}>내 사주</h2><p style={{fontSize:"13px",color:"#4A4060",margin:0}}>정확한 정보를 입력할수록 분석이 정밀해져요</p></div>
-        <G><PF n={nm} sn={sNm} g={gd} sg={sGd} y={by} sy={sBY} m={bm} sm={sBM} d={bd} sd={sBD} sj={selectedSijin} ssj={setSijin}/>
+        <G><PF n={nm} sn={sNm} g={gd} sg={sGd} y={by} sy={sBY} m={bm} sm={sBM} d={bd} sd={sBD} sj={selectedSijin} ssj={setSijin} nameRef={nameInputRef} yearRef={yearInputRef}/>
           <div style={{marginTop:"12px"}}><label style={{display:"block",fontSize:"10px",color:"#6B5F8A",marginBottom:"4px"}}>궁금한 점 <span style={{color:"#3A3454"}}>(선택)</span></label>
-            <KTextarea value={q} onValueChange={sQ} placeholder="예: 올해 이직 타이밍이 궁금합니다" rows={2} style={{width:"100%",padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box",resize:"vertical",lineHeight:1.5}}/></div>
+            <textarea ref={questionRef} defaultValue={q} placeholder="예: 올해 이직 타이밍이 궁금합니다" rows={2} style={{width:"100%",padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box",resize:"vertical",lineHeight:1.5}}/></div>
         </G>
         <div style={{display:"flex",gap:"8px",marginTop:"12px"}}>
           <button onClick={()=>run("basic")} disabled={!canGo} style={{flex:1,padding:"13px",borderRadius:"12px",border:"1px solid rgba(167,139,250,.15)",background:"transparent",color:canGo?"#A78BFA":"#2A2540",fontSize:"13px",fontWeight:600,cursor:canGo?"pointer":"not-allowed"}}>무료 분석</button>
@@ -546,9 +516,9 @@ export default function SajuV2(){
       {pg==="compat"&&<div style={{maxWidth:"420px",margin:"0 auto",padding:"24px 20px 40px",position:"relative",zIndex:1,animation:"fadeIn .3s"}}>
         <button onClick={()=>{setPg("home");setNT("home")}} style={{background:"none",border:"none",color:"#3A3454",cursor:"pointer",fontSize:"11px",marginBottom:"14px"}}>← 돌아가기</button>
         <div style={{textAlign:"center",marginBottom:"18px"}}><span style={{fontSize:"20px"}}>💫</span><h2 style={{fontSize:"24px",fontWeight:700,color:"#fff",margin:"4px 0 0"}}>궁합</h2></div>
-        <G style={{marginBottom:"8px"}}><PF idx="첫 번째" n={nm} sn={sNm} g={gd} sg={sGd} y={by} sy={sBY} m={bm} sm={sBM} d={bd} sd={sBD} sj={selectedSijin} ssj={setSijin}/></G>
+        <G style={{marginBottom:"8px"}}><PF idx="첫 번째" n={nm} sn={sNm} g={gd} sg={sGd} y={by} sy={sBY} m={bm} sm={sBM} d={bd} sd={sBD} sj={selectedSijin} ssj={setSijin} nameRef={nameInputRef} yearRef={yearInputRef}/></G>
         <div style={{textAlign:"center",fontSize:"14px",color:"#F472B6",margin:"3px 0"}}>♥</div>
-        <G><PF idx="두 번째" n={nm2} sn={sNm2} g={gd2} sg={sGd2} y={by2} sy={sBY2} m={bm2} sm={sBM2} d={bd2} sd={sBD2} sj={sijin2} ssj={setSijin2}/></G>
+        <G><PF idx="두 번째" n={nm2} sn={sNm2} g={gd2} sg={sGd2} y={by2} sy={sBY2} m={bm2} sm={sBM2} d={bd2} sd={sBD2} sj={sijin2} ssj={setSijin2} nameRef={name2InputRef} yearRef={year2InputRef}/></G>
         <button onClick={runCompat} disabled={!by||!bm||!bd||!by2||!bm2||!bd2} style={{width:"100%",marginTop:"12px",padding:"13px",borderRadius:"12px",border:"none",background:(by&&by2)?"linear-gradient(135deg,#F472B6,#EC4899)":"#1E1A30",color:(by&&by2)?"#fff":"#2A2540",fontSize:"13px",fontWeight:600,cursor:(by&&by2)?"pointer":"not-allowed"}}>궁합 분석</button>
       </div>}
 
@@ -657,7 +627,7 @@ export default function SajuV2(){
 
         {tab==="chat"&&<G style={{minHeight:"160px"}}>
           <div style={{display:"flex",flexWrap:"wrap",gap:"4px",marginBottom:"12px",justifyContent:"center"}}>
-            {["이직 시기","재물운","연애운","건강 주의점","내년 운세","궁합 좋은 띠"].map(t=><button key={t} onClick={()=>{sFU(t+"이 궁금해요");if(chatInputRef.current)chatInputRef.current.value=t+"이 궁금해요"}} style={{padding:"5px 10px",borderRadius:"14px",border:"1px solid rgba(167,139,250,.08)",background:"transparent",color:"#6B5F8A",fontSize:"12px",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.25)"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.08)"}>{t}</button>)}
+            {["이직 시기","재물운","연애운","건강 주의점","내년 운세","궁합 좋은 띠"].map(t=><button key={t} onClick={()=>{const v=t+"이 궁금해요";sFU(v);if(chatInputRef.current)chatInputRef.current.value=v}} style={{padding:"5px 10px",borderRadius:"14px",border:"1px solid rgba(167,139,250,.08)",background:"transparent",color:"#6B5F8A",fontSize:"12px",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.25)"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(167,139,250,.08)"}>{t}</button>)}
           </div>
           {ch.slice(1).map((m,i)=><div key={i} style={{marginBottom:"10px"}}>
             {m.role==="user"&&<div style={{background:"rgba(167,139,250,.05)",borderRadius:"8px",padding:"8px 10px",borderLeft:"2px solid #A78BFA",marginBottom:"6px"}}><p style={{margin:0,color:"#E0D4FF",fontSize:"12px"}}>{m.content}</p></div>}
@@ -686,8 +656,8 @@ export default function SajuV2(){
 
         {tab==="chat"&&<div style={{position:"fixed",bottom:"72px",left:0,right:0,background:"linear-gradient(transparent,#0B0A1A 40%)",padding:"12px 16px 12px",zIndex:10}}>
           <div style={{maxWidth:"480px",margin:"0 auto",display:"flex",gap:"6px"}}>
-            <input ref={chatInputRef} defaultValue="" onChange={e=>{if(!chatComposing.current)sFU(e.target.value)}} onCompositionStart={()=>{chatComposing.current=true}} onCompositionEnd={e=>{chatComposing.current=false;sFU(e.target.value)}} onKeyDown={e=>{if(e.key==="Enter"&&!chatComposing.current){doChat()}}} placeholder="질문을 입력하세요" style={{flex:1,padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box"}}/>
-            <button onClick={doChat} disabled={cl||!fu.trim()} style={{padding:"11px 16px",borderRadius:"10px",border:"none",background:fu.trim()?"linear-gradient(135deg,#A78BFA,#7C5CFC)":"#1E1A30",color:fu.trim()?"#fff":"#2A2540",fontSize:"12px",fontWeight:600,cursor:fu.trim()?"pointer":"not-allowed",whiteSpace:"nowrap"}}>질문</button>
+            <input ref={chatInputRef} defaultValue="" onKeyDown={e=>{if(e.key==="Enter"&&!e.nativeEvent.isComposing){sFU(chatInputRef.current.value);setTimeout(doChat,10)}}} placeholder="질문을 입력하세요" style={{flex:1,padding:"11px 13px",borderRadius:"10px",border:"1px solid rgba(167,139,250,0.12)",background:"rgba(255,255,255,0.03)",color:"#E0D4FF",fontSize:"16px",fontFamily:"'Pretendard',sans-serif",outline:"none",boxSizing:"border-box"}}/>
+            <button onClick={()=>{if(chatInputRef.current)sFU(chatInputRef.current.value);setTimeout(doChat,10)}} disabled={cl} style={{padding:"11px 16px",borderRadius:"10px",border:"none",background:fu.trim()?"linear-gradient(135deg,#A78BFA,#7C5CFC)":"#1E1A30",color:fu.trim()?"#fff":"#2A2540",fontSize:"12px",fontWeight:600,cursor:fu.trim()?"pointer":"not-allowed",whiteSpace:"nowrap"}}>질문</button>
           </div>
         </div>}
       </div>}

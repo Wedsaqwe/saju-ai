@@ -1,34 +1,25 @@
-export async function POST(request) {
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+export async function POST(req) {
   try {
-    const body = await request.json();
-    
-    // messages에 이미지 content block이 포함될 수 있도록 처리
-    const messages = (body.messages || []).map(m => {
-      // content가 이미 배열인 경우 (이미지 포함) 그대로 전달
-      if (Array.isArray(m.content)) {
-        return { role: m.role, content: m.content };
-      }
-      // 문자열인 경우 기본 처리
-      return { role: m.role, content: m.content };
+    const body = await req.json();
+    const { model, max_tokens, system, messages } = body;
+
+    const response = await client.messages.create({
+      model: model || "claude-sonnet-4-20250514",
+      max_tokens: max_tokens || 4000,
+      system: system || "",
+      messages: messages || [],
     });
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: body.model || "claude-sonnet-4-20250514",
-        max_tokens: body.max_tokens || 4000,
-        system: body.system || "",
-        messages: messages,
-      }),
-    });
-    const data = await response.json();
-    return Response.json(data);
+    return Response.json(response);
   } catch (error) {
-    return Response.json({ error: "API request failed" }, { status: 500 });
+    console.error("Chat API error:", error);
+    return Response.json(
+      { error: error.message || "API 호출 실패" },
+      { status: 500 }
+    );
   }
 }

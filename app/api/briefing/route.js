@@ -1,227 +1,152 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-// ─── RSS Feed Sources (무료) ───
-const RSS_FEEDS = [
-  // Global Markets
-  { url: "https://feeds.reuters.com/reuters/businessNews", name: "Reuters Business", cat: "macro" },
-  { url: "https://feeds.reuters.com/reuters/technologyNews", name: "Reuters Tech", cat: "stock" },
-  { url: "https://news.google.com/rss/search?q=federal+reserve+interest+rate&hl=en-US&gl=US&ceid=US:en", name: "Google News - Fed", cat: "macro" },
-  { url: "https://news.google.com/rss/search?q=stock+market+today&hl=en-US&gl=US&ceid=US:en", name: "Google News - Stocks", cat: "stock" },
-  { url: "https://news.google.com/rss/search?q=cryptocurrency+bitcoin+ethereum&hl=en-US&gl=US&ceid=US:en", name: "Google News - Crypto", cat: "crypto" },
-  { url: "https://news.google.com/rss/search?q=forex+currency+exchange+rate&hl=en-US&gl=US&ceid=US:en", name: "Google News - Forex", cat: "forex" },
-  { url: "https://news.google.com/rss/search?q=real+estate+housing+market&hl=en-US&gl=US&ceid=US:en", name: "Google News - Real Estate", cat: "realestate" },
-  // Korea
-  { url: "https://news.google.com/rss/search?q=한국+주식+코스피&hl=ko&gl=KR&ceid=KR:ko", name: "Google News - KOSPI", cat: "stock" },
-  { url: "https://news.google.com/rss/search?q=서울+부동산+아파트&hl=ko&gl=KR&ceid=KR:ko", name: "Google News - Seoul RE", cat: "realestate" },
-  { url: "https://news.google.com/rss/search?q=원달러+환율&hl=ko&gl=KR&ceid=KR:ko", name: "Google News - KRW", cat: "forex" },
-  { url: "https://news.google.com/rss/search?q=비트코인+암호화폐&hl=ko&gl=KR&ceid=KR:ko", name: "Google News - Crypto KR", cat: "crypto" },
-];
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// ─── Simple RSS Parser ───
-async function fetchRSS(feed, signal) {
+/* ═══ RSS 소스 (무료, 11개) ═══ */
+const RSS_SOURCES = {
+  kr: [
+    { name: "Google News KR", url: "https://news.google.com/rss/search?q=경제+주식+투자&hl=ko&gl=KR&ceid=KR:ko", cat: "all" },
+    { name: "Google News KR 부동산", url: "https://news.google.com/rss/search?q=부동산+아파트+전세&hl=ko&gl=KR&ceid=KR:ko", cat: "realestate" },
+    { name: "Google News KR 암호화폐", url: "https://news.google.com/rss/search?q=비트코인+암호화폐+코인&hl=ko&gl=KR&ceid=KR:ko", cat: "crypto" },
+    { name: "Google News KR 환율", url: "https://news.google.com/rss/search?q=환율+달러+원화&hl=ko&gl=KR&ceid=KR:ko", cat: "forex" },
+    { name: "Google News KR 거시경제", url: "https://news.google.com/rss/search?q=금리+인플레이션+GDP+한국은행&hl=ko&gl=KR&ceid=KR:ko", cat: "macro" },
+  ],
+  en: [
+    { name: "Reuters Business", url: "https://news.google.com/rss/search?q=stock+market+economy&hl=en&gl=US&ceid=US:en", cat: "all" },
+    { name: "Google News EN Crypto", url: "https://news.google.com/rss/search?q=bitcoin+cryptocurrency&hl=en&gl=US&ceid=US:en", cat: "crypto" },
+    { name: "Google News EN Macro", url: "https://news.google.com/rss/search?q=federal+reserve+interest+rate+inflation&hl=en&gl=US&ceid=US:en", cat: "macro" },
+    { name: "Google News EN Real Estate", url: "https://news.google.com/rss/search?q=real+estate+housing+market&hl=en&gl=US&ceid=US:en", cat: "realestate" },
+    { name: "Google News EN Forex", url: "https://news.google.com/rss/search?q=forex+dollar+exchange+rate&hl=en&gl=US&ceid=US:en", cat: "forex" },
+    { name: "Google News EN Stock", url: "https://news.google.com/rss/search?q=stock+market+S%26P500+nasdaq&hl=en&gl=US&ceid=US:en", cat: "stock" },
+  ],
+};
+
+/* ═══ RSS 파싱 (XML → 텍스트) ═══ */
+async function fetchRSS(url, timeout = 5000) {
   try {
-    const res = await fetch(feed.url, {
-      signal,
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    const res = await fetch(url, {
+      signal: controller.signal,
       headers: { "User-Agent": "NUVO-AI-Briefing/1.0" },
     });
-    if (!res.ok) return [];
-    const xml = await res.text();
+    clearTimeout(timer);
+    const text = await res.text();
 
-    // Basic XML parsing for RSS items
+    // 간단한 XML 파싱 (item 태그 추출)
     const items = [];
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
     let match;
-    while ((match = itemRegex.exec(xml)) !== null && items.length < 5) {
-      const content = match[1];
-      const title = content.match(/<title><!\[CDATA\[(.*?)\]\]>|<title>(.*?)<\/title>/)?.[1] || content.match(/<title>(.*?)<\/title>/)?.[1] || "";
-      const desc = content.match(/<description><!\[CDATA\[(.*?)\]\]>|<description>(.*?)<\/description>/)?.[1] || content.match(/<description>(.*?)<\/description>/)?.[1] || "";
-      const pubDate = content.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
-      
-      // Strip HTML tags from description
-      const cleanDesc = desc.replace(/<[^>]*>/g, "").trim();
-      
-      if (title) {
-        items.push({
-          title: title.replace(/<[^>]*>/g, "").trim(),
-          description: cleanDesc.substring(0, 300),
-          pubDate,
-          source: feed.name,
-          category: feed.cat,
-        });
-      }
+    while ((match = itemRegex.exec(text)) !== null && items.length < 8) {
+      const itemXml = match[1];
+      const title = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]>|<title>(.*?)<\/title>/)?.[1] || itemXml.match(/<title>(.*?)<\/title>/)?.[1] || "";
+      const desc = itemXml.match(/<description><!\[CDATA\[(.*?)\]\]>|<description>(.*?)<\/description>/)?.[1] || "";
+      const pubDate = itemXml.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
+      if (title) items.push({ title: title.replace(/<[^>]+>/g, "").trim(), desc: desc.replace(/<[^>]+>/g, "").trim().slice(0, 200), date: pubDate });
     }
     return items;
   } catch (e) {
-    console.error(`RSS fetch failed for ${feed.name}:`, e.message);
+    console.error(`RSS fetch failed: ${url}`, e.message);
     return [];
   }
 }
 
-// ─── Collect All News ───
-async function collectNews() {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+/* ═══ 브리핑 생성 프롬프트 ═══ */
+function buildBriefingPrompt(articles, lang, category) {
+  const langLabel = lang === "kr" ? "한국어" : "English";
+  const catLabel = { all: "전체", stock: "주식", realestate: "부동산", forex: "환율", crypto: "암호화폐", macro: "거시경제" }[category] || "전체";
 
-  try {
-    const results = await Promise.allSettled(
-      RSS_FEEDS.map((feed) => fetchRSS(feed, controller.signal))
-    );
+  return `당신은 글로벌 금융 시장 분석가입니다. 아래 뉴스를 분석하여 ${langLabel}로 투자 브리핑을 작성하세요.
+카테고리: ${catLabel}
 
-    const allItems = results
-      .filter((r) => r.status === "fulfilled")
-      .flatMap((r) => r.value);
-
-    // Sort by date (newest first) and deduplicate by title similarity
-    const sorted = allItems.sort((a, b) => {
-      const da = a.pubDate ? new Date(a.pubDate) : new Date(0);
-      const db = b.pubDate ? new Date(b.pubDate) : new Date(0);
-      return db - da;
-    });
-
-    // Take top items per category
-    const byCat = {};
-    for (const item of sorted) {
-      if (!byCat[item.category]) byCat[item.category] = [];
-      if (byCat[item.category].length < 8) byCat[item.category].push(item);
-    }
-
-    return Object.values(byCat).flat();
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-// ─── Claude API: Analyze & Generate Briefing ───
-async function generateBriefing(newsItems) {
-  const client = new Anthropic();
-
-  const newsDigest = newsItems
-    .map((n, i) => `[${i + 1}] [${n.category.toUpperCase()}] ${n.source}: ${n.title}\n${n.description}`)
-    .join("\n\n");
-
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "Asia/Seoul",
-  });
-
-  const systemPrompt = `You are NUVO AI, a world-class financial market analyst that produces daily briefings for sophisticated investors. You combine macro analysis, cross-asset correlations, and chain-reaction forecasting.
-
-Your output must be a valid JSON object with this exact structure. Do NOT wrap in markdown code blocks. Return ONLY the JSON:
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만:
 
 {
-  "date": "${today}",
-  "ticker": [
-    {"name": "S&P 500", "nameKr": "S&P 500", "value": "5,892", "change": "+1.2%", "direction": "up"},
-    {"name": "KOSPI", "nameKr": "코스피", "value": "2,687", "change": "-0.3%", "direction": "down"},
-    {"name": "BTC/USD", "nameKr": "비트코인", "value": "$97,452", "change": "+3.8%", "direction": "up"},
-    {"name": "USD/KRW", "nameKr": "달러/원", "value": "1,342", "change": "+0.1%", "direction": "up"},
-    {"name": "Gold", "nameKr": "금", "value": "$3,041", "change": "+0.6%", "direction": "up"},
-    {"name": "10Y UST", "nameKr": "미국 10년물", "value": "4.28%", "change": "-2bp", "direction": "down"}
-  ],
-  "aiSummary": {
-    "en": "3-4 sentence executive summary connecting today's key themes across all asset classes. Bold the most critical points with <strong> tags.",
-    "kr": "Korean version of the same summary, naturally written (not Google Translate), with Korean market context woven in."
-  },
-  "briefings": [
+  "summary": "오늘 시장의 핵심 3줄 요약 (마크다운)",
+  "insights": [
     {
-      "category": "stock|realestate|forex|crypto|macro",
-      "impact": "high|mid|low",
-      "tags": ["stock", "macro"],
-      "time": "HH:MM KST",
-      "headline": {"en": "...", "kr": "..."},
-      "summary": {"en": "2-3 sentences on what happened", "kr": "..."},
-      "insight": {"en": "3-4 sentences of deep analysis — historical precedents, specific numbers, contrarian angles. This is what makes NUVO AI different from generic news.", "kr": "..."},
-      "chainReaction": {
-        "en": [
-          {"text": "<strong>First order effect</strong> → immediate market impact"},
-          {"text": "<strong>Second order</strong> → follow-on effect"},
-          {"text": "<strong>Third order</strong> → cross-asset spillover"},
-          {"text": "<strong>Fourth order</strong> → final downstream consequence"}
-        ],
-        "kr": [same structure in Korean]
-      },
-      "impactScore": 7
+      "title": "인사이트 제목",
+      "content": "분석 내용 (2~3문장)",
+      "impact": 임팩트 점수 (-5 ~ +5),
+      "chain": ["1차 영향", "2차 영향", "3차 영향", "4차 영향"]
     }
   ],
   "signals": [
     {
-      "direction": "📈|📉|⚠️",
-      "asset": {"en": "Asset Name", "kr": "자산명"},
-      "prediction": {"en": "1-2 sentence prediction with timeframe", "kr": "..."},
-      "confidence": 75
+      "title": "시그널 제목",
+      "direction": "상승" 또는 "하락" 또는 "중립",
+      "sector": "관련 섹터",
+      "confidence": 신뢰도 (0~100)
     }
   ]
 }
 
-RULES:
-- Generate exactly 4 briefings: pick the 4 most impactful stories from the news digest
-- Each briefing MUST have exactly 4 chain reaction steps
-- Generate exactly 4 signals
-- Ticker values should be realistic estimates based on the news context
-- Impact scores: 8-10 for market-moving events, 5-7 for notable, 1-4 for minor
-- Korean text must be naturally written, not translated — use Korean financial terminology (갭투자, 재건축, 김치프리미엄, 주담대 etc.)
-- Insights should include specific numbers, historical precedents, and contrarian analysis
-- Chain reactions must show cross-asset correlations (e.g., Fed → bonds → FX → Korean real estate)
-- Be specific: mention actual companies, indices, percentages, timeframes`;
+insights는 4개, signals는 4개 생성하세요.
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 6000,
-    messages: [
-      {
-        role: "user",
-        content: `Here is today's news digest (${today}). Analyze these and generate the NUVO AI Daily Briefing:\n\n${newsDigest}`,
-      },
-    ],
-    system: systemPrompt,
-  });
-
-  const text = message.content[0].text;
-
-  // Try to parse JSON - handle potential markdown code blocks
-  let cleaned = text.trim();
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
-  }
-
-  return JSON.parse(cleaned);
+=== 수집된 뉴스 ===
+${articles.map((a, i) => `[${i + 1}] ${a.title}\n${a.desc}`).join("\n\n")}`;
 }
 
-// ─── API Route Handler ───
 export async function POST(req) {
   try {
-    // Step 1: Collect news from RSS feeds
-    const newsItems = await collectNews();
+    const { lang = "kr", category = "all" } = await req.json();
 
-    if (newsItems.length === 0) {
-      return Response.json(
-        { error: "No news items collected. RSS feeds may be temporarily unavailable." },
-        { status: 502 }
-      );
+    // 1. RSS 수집
+    const sources = RSS_SOURCES[lang] || RSS_SOURCES.kr;
+    const filteredSources = category === "all"
+      ? sources
+      : sources.filter((s) => s.cat === "all" || s.cat === category);
+
+    const allArticles = [];
+    await Promise.all(
+      filteredSources.map(async (src) => {
+        const items = await fetchRSS(src.url);
+        items.forEach((item) => allArticles.push({ ...item, source: src.name }));
+      })
+    );
+
+    // 중복 제거 + 최신순 정렬
+    const seen = new Set();
+    const unique = allArticles.filter((a) => {
+      const key = a.title.slice(0, 30);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 20);
+
+    if (unique.length === 0) {
+      return Response.json({ error: "뉴스를 수집할 수 없습니다. 잠시 후 다시 시도해주세요." });
     }
 
-    // Step 2: Send to Claude for analysis
-    const briefing = await generateBriefing(newsItems);
-
-    return Response.json({
-      success: true,
-      briefing,
-      meta: {
-        newsCount: newsItems.length,
-        generatedAt: new Date().toISOString(),
-        sources: [...new Set(newsItems.map((n) => n.source))],
-      },
+    // 2. Claude 분석
+    const prompt = buildBriefingPrompt(unique, lang, category);
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 3000,
+      messages: [{ role: "user", content: prompt }],
     });
+
+    const text = response.content?.map((b) => (b.type === "text" ? b.text : "")).join("") || "";
+
+    // JSON 파싱
+    try {
+      // ```json ... ``` 제거
+      const cleaned = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+      const data = JSON.parse(cleaned);
+      return Response.json(data);
+    } catch (parseErr) {
+      // JSON 파싱 실패 시 raw text로 폴백
+      return Response.json({
+        summary: text.slice(0, 500),
+        insights: [],
+        signals: [],
+        raw: true,
+      });
+    }
   } catch (error) {
-    console.error("Briefing generation error:", error);
+    console.error("Briefing API error:", error);
     return Response.json(
-      {
-        error: "Failed to generate briefing",
-        details: error.message,
-      },
+      { error: error.message || "브리핑 생성 실패" },
       { status: 500 }
     );
   }

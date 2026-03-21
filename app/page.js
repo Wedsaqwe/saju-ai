@@ -566,7 +566,7 @@ export default function NuvoApp(){
     setCh(p=>[...p,{role:"assistant",content:text}]);setChatLoading(false);
   }
 
-  async function doDaily(){if(!saju||dailyLoading)return;setDailyLoading(true);const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}\n오늘:${todayFull}`;const text=await callAI(PR_DAILY,[{role:"user",content:u}],2000);setDailyRd(text);setDailyLoading(false)}
+  async function doDaily(){if(!saju||dailyLoading)return;setDailyLoading(true);const u=`사주:${sStr(saju)}\n일간:${saju.일주.간}\n오행:${Object.entries(oh||{}).map(([k,v])=>`${OHK[k]}${v}`).join(" ")}\n이름:${savedName||"회원"}\n오늘:${todayFull}\n오늘 일진:${(()=>{const dc=calcD(today.getFullYear(),today.getMonth()+1,today.getDate());return GK[dc.간]+JK[dc.지]})()}`;const text=await callAI(PR_DAILY,[{role:"user",content:u}],2000);setDailyRd(text);setDailyLoading(false)}
 
   async function doCat(cat){
     if(!saju)return;
@@ -623,7 +623,7 @@ export default function NuvoApp(){
   function goHome(){setMainTab("home");setPg("home")}
   function goFortune(){setMainTab("fortune");setPg("fortuneHub")}
   function goFortuneSub(sub){setMainTab("fortune");setPg(sub)}
-  function goBriefing(){setMainTab("briefing");setPg("briefingHub");setBriefSub("daily")}
+  function goBriefing(){setMainTab("briefing");setPg("briefingHub");setBriefSub("daily");if(!briefData&&!briefLoading)setTimeout(loadBriefing,300)}
   function goMy(){setMainTab("my");setPg("myPage")}
   function resetAll(){setPg("home");setMainTab("home");setRd("");setCh([]);setSaju2(null);setTab("result")}
 
@@ -707,6 +707,20 @@ export default function NuvoApp(){
           </div>}
         </div>
 
+        {/* 신규 사용자 온보딩 */}
+        {!hasSaju&&<Card style={{marginBottom:16,padding:"28px 22px",textAlign:"center",background:"linear-gradient(135deg,rgba(139,92,246,0.12),rgba(16,185,129,0.06))",border:"1px solid rgba(139,92,246,0.2)"}}>
+          <div style={{fontSize:36,marginBottom:12}}>🔮</div>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#fff",margin:"0 0 8px",letterSpacing:"-0.03em"}}>나의 사주를 분석해보세요</h2>
+          <p style={{fontSize:13,color:T.sub,margin:"0 0 20px",lineHeight:1.6}}>생년월일만 입력하면 AI가 사주·별자리·MBTI를<br/>동서양 융합으로 분석합니다</p>
+          <Btn primary onClick={()=>goFortuneSub("input")} style={{padding:"14px 36px",fontSize:15}}>사주 입력하기 →</Btn>
+          <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:20}}>
+            {[{emoji:"☯",label:"사주명리"},{emoji:"⭐",label:"서양 점성술"},{emoji:"🧠",label:"MBTI 추정"},{emoji:"📈",label:"투자 시그널"}].map((f,i)=><div key={i} style={{textAlign:"center"}}>
+              <div style={{fontSize:18}}>{f.emoji}</div>
+              <div style={{fontSize:9,color:T.dim,marginTop:2}}>{f.label}</div>
+            </div>)}
+          </div>
+        </Card>}
+
         {/* 오늘의 운세 카드 */}
         {hasSaju&&<Card style={{marginBottom:12,cursor:"pointer",padding:"16px 18px",background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(16,185,129,0.04))"}} onClick={()=>{if(!dailyRd)doDaily();goFortuneSub("daily")}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}><span style={{fontSize:22,animation:"float 3s ease infinite"}}>✨</span><div style={{flex:1}}><div style={{fontSize:15,fontWeight:700,color:"#fff"}}>{savedName||"나"}의 오늘의 운세</div><div style={{fontSize:12,color:T.dim}}>{todayFull}</div></div><span style={{color:T.dim,fontSize:16}}>→</span></div>
@@ -757,27 +771,39 @@ export default function NuvoApp(){
           </div>
         </Card>}
 
-        {/* 기능 메뉴 */}
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {[
-            {emoji:"🔮",title:"사주 분석",desc:"종합 사주명리 분석",fn:()=>{goFortune();setTimeout(()=>goFortuneSub("input"),0)}},
-            {emoji:"⭐",title:"점성술",desc:"서양 별자리 운세",badge:"NEW",bc:T.gold,fn:()=>{if(hasSaju)doAstro();else{setPendingAction("astro");goFortuneSub("input")}}},
-            {emoji:"🌌",title:"통합 리포트",desc:"사주 × 점성술 × MBTI",badge:"PREMIUM",bc:T.purple2,fn:()=>{if(hasSaju){if(prem)doIntegrated();else setPw(true)}else{setPendingAction("integrated");goFortuneSub("input")}}},
-            {emoji:"💫",title:"궁합",desc:"두 사람의 궁합 분석",fn:()=>goFortuneSub("compat")},
-            ...(hasSaju?[{emoji:"🎴",title:"타로 카드",desc:"3카드 리딩",fn:doTarot}]:[]),
-            {emoji:"👤",title:"AI 관상",desc:"사주 / 사진 관상 분석",badge:"NEW",bc:T.green,fn:()=>{if(hasSaju)goFortuneSub("faceMenu");else{setPendingAction("face");goFortuneSub("input")}}},
-            {emoji:"🧠",title:"사주 MBTI",desc:"오행 기반 MBTI 추정",badge:"NEW",bc:T.blue,fn:()=>{if(hasSaju)goFortuneSub("mbtiResult");else{setPendingAction("mbti");goFortuneSub("input")}}},
-          ].map((item,i)=><Card key={i} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:"16px 18px"}} onClick={item.fn}>
-            <div style={{width:40,height:40,borderRadius:12,background:T.surface,border:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{item.emoji}</div>
-            <div style={{flex:1}}>
-              <div style={{display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:15,fontWeight:700,color:"#fff"}}>{item.title}</span>
-                {item.badge&&<span style={{padding:"2px 8px",borderRadius:50,background:`${item.bc||T.purple}15`,color:item.bc||T.purple,fontSize:9,fontWeight:700}}>{item.badge}</span>}
-              </div>
-              <div style={{fontSize:12,color:T.dim,marginTop:1}}>{item.desc}</div>
-            </div>
-            <span style={{color:T.dim,fontSize:14}}>→</span>
-          </Card>)}
+        {/* 빠른 액션 (홈에서는 핵심만) */}
+        <div style={{display:"flex",gap:8,marginBottom:8}}>
+          <Card style={{flex:1,cursor:"pointer",padding:"16px 14px",textAlign:"center"}} onClick={()=>goFortuneSub("input")}>
+            <div style={{fontSize:22,marginBottom:4}}>🔮</div>
+            <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>사주 분석</div>
+          </Card>
+          <Card style={{flex:1,cursor:"pointer",padding:"16px 14px",textAlign:"center"}} onClick={()=>goFortuneSub("compat")}>
+            <div style={{fontSize:22,marginBottom:4}}>💫</div>
+            <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>궁합</div>
+          </Card>
+          <Card style={{flex:1,cursor:"pointer",padding:"16px 14px",textAlign:"center"}} onClick={()=>{if(hasSaju)doTarot();else goFortuneSub("input")}}>
+            <div style={{fontSize:22,marginBottom:4}}>🎴</div>
+            <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>타로</div>
+          </Card>
+        </div>
+        {hasSaju&&<div style={{display:"flex",gap:8}}>
+          <Card style={{flex:1,cursor:"pointer",padding:"14px 12px",textAlign:"center"}} onClick={doAstro}>
+            <div style={{fontSize:18,marginBottom:2}}>⭐</div>
+            <div style={{fontSize:11,fontWeight:600,color:T.sub}}>점성술</div>
+          </Card>
+          <Card style={{flex:1,cursor:"pointer",padding:"14px 12px",textAlign:"center"}} onClick={()=>{if(prem)doIntegrated();else setPw(true)}}>
+            <div style={{fontSize:18,marginBottom:2}}>🌌</div>
+            <div style={{fontSize:11,fontWeight:600,color:T.sub}}>통합 리포트</div>
+          </Card>
+          <Card style={{flex:1,cursor:"pointer",padding:"14px 12px",textAlign:"center"}} onClick={()=>goFortuneSub("faceMenu")}>
+            <div style={{fontSize:18,marginBottom:2}}>👤</div>
+            <div style={{fontSize:11,fontWeight:600,color:T.sub}}>관상</div>
+          </Card>
+          <Card style={{flex:1,cursor:"pointer",padding:"14px 12px",textAlign:"center"}} onClick={()=>goFortuneSub("mbtiResult")}>
+            <div style={{fontSize:18,marginBottom:2}}>🧠</div>
+            <div style={{fontSize:11,fontWeight:600,color:T.sub}}>MBTI</div>
+          </Card>
+        </div>}
         </div>
       </div>}
 
@@ -1032,7 +1058,7 @@ export default function NuvoApp(){
 
       {/* ═══ RESULT PAGE ═══ */}
       {pg==="result"&&saju&&<div style={{...page,maxWidth:480}}>
-        <Back onClick={goHome}/>
+        <Back onClick={goFortune}/>
         <Card style={{marginBottom:12}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
             <span style={{fontSize:12,color:T.dim}}>{savedName?`${savedName} · `:""}{savedYear}.{month}.{day} · {DDI_E[saju.년주.지]} {DDI[saju.년주.지]}띠</span>
@@ -1321,6 +1347,27 @@ export default function NuvoApp(){
               <p style={{fontSize:13,color:T.sub,margin:"0 0 10px"}}>Fortune × Signal은 번들 전용 기능입니다</p>
               <Btn primary onClick={()=>setPw(true)} style={{fontSize:13,padding:"10px 24px"}}>번들 구독 ✦</Btn>
             </div>}
+
+            {/* AI 맞춤 투자 조언 */}
+            {hasBundleSub&&<Card style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:T.purple,fontWeight:700,letterSpacing:".04em",marginBottom:12}}>AI 맞춤 투자 조언</div>
+              {fsLoading&&<div style={{textAlign:"center",padding:20}}><Spin/></div>}
+              {fsData&&!fsData.error&&<div>
+                {fsData.investType&&<div style={{padding:12,borderRadius:10,background:T.surface,border:`1px solid ${T.border}`,marginBottom:10}}>
+                  <div style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:4}}>{fsData.investType}</div>
+                  <p style={{fontSize:12,color:T.sub,margin:0,lineHeight:1.6}}>{fsData.investDesc}</p>
+                </div>}
+                {fsData.advice&&<div style={{padding:12,borderRadius:10,background:`${T.green}08`,border:`1px solid ${T.green}15`}}>
+                  <div style={{fontSize:10,color:T.green,fontWeight:600,marginBottom:4}}>맞춤 조언</div>
+                  <p style={{fontSize:12,color:T.sub,margin:0,lineHeight:1.6}}>{fsData.advice}</p>
+                </div>}
+                {fsData.cautionSector&&<div style={{marginTop:8,padding:12,borderRadius:10,background:`${T.red}08`,border:`1px solid ${T.red}15`}}>
+                  <div style={{fontSize:10,color:T.red,fontWeight:600,marginBottom:4}}>주의 섹터</div>
+                  <p style={{fontSize:12,color:T.sub,margin:0,lineHeight:1.6}}>{fsData.cautionSector}</p>
+                </div>}
+              </div>}
+              {!fsData&&!fsLoading&&<Btn primary onClick={async()=>{setFsLoading(true);const d=await fetchFortuneSignal({},oh);setFsData(d);setFsLoading(false)}} style={{width:"100%",fontSize:13}}>AI 투자 조언 받기</Btn>}
+            </Card>}
           </div>}
         </div>}
 
@@ -1382,12 +1429,15 @@ export default function NuvoApp(){
                 </div>
               </div>
               <div style={{marginTop:10,padding:10,borderRadius:10,background:`${GRADE_COLOR[calSelected.grade]}08`,border:`1px solid ${GRADE_COLOR[calSelected.grade]}20`}}>
+                <div style={{fontSize:10,color:GRADE_COLOR[calSelected.grade],fontWeight:600,marginBottom:4}}>추천 액션</div>
                 <p style={{fontSize:12,color:T.sub,margin:0,lineHeight:1.6}}>
-                  {calSelected.grade==="A+"||calSelected.grade==="A"?"투자에 좋은 날입니다. 적극적인 매수/매도 결정을 검토해보세요."
-                  :calSelected.grade==="B"?"평이한 날입니다. 기존 포지션 유지를 권장합니다."
-                  :calSelected.grade==="C"?"신중한 판단이 필요한 날입니다. 대규모 거래는 피하세요."
-                  :"투자 결정을 미루는 것이 좋습니다. 관망을 추천합니다."}
+                  {calSelected.grade==="A+"?"생합일 — 적극 매수/매도 결정에 최적. 큰 계약, 투자 실행일로 활용하세요."
+                  :calSelected.grade==="A"?`상생일 — ${OH_ASSET[OH_J[calSelected.지]]?.label||"관련"} 섹터에 주목. 신규 종목 편입 검토에 좋습니다.`
+                  :calSelected.grade==="B"?"비화일 — 평이한 에너지. 기존 포지션 유지하며 리밸런싱 정도만 검토하세요."
+                  :calSelected.grade==="C"?"상극일 — 신중 판단 필요. 소액 분할 매수만 고려하고 대규모 거래는 피하세요."
+                  :"충일 — 에너지 충돌. 투자 결정을 미루고 관망하세요. 정보 수집에 집중하는 날."}
                 </p>
+                {calSelected.hasJae&&<p style={{fontSize:11,color:T.green,margin:"6px 0 0",fontWeight:600}}>💰 재성 출현 — 재물 기운이 활성화되는 날입니다</p>}
               </div>
             </Card>}
 

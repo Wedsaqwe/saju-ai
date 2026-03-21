@@ -804,7 +804,6 @@ export default function NuvoApp(){
             <div style={{fontSize:11,fontWeight:600,color:T.sub}}>MBTI</div>
           </Card>
         </div>}
-        </div>
       </div>}
 
       {/* ═══════════════════════════════════════

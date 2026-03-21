@@ -398,6 +398,20 @@ export default function SajuApp(){
           </div>
         </Card>}
 
+        {hasSaju&&<div onClick={()=>window.location.href=`/briefing?tab=fortune&birth=${savedYear}-${month}-${day}-${hourFromSijin(sijin)||12}`} style={{cursor:"pointer",marginBottom:12,padding:"18px 20px",borderRadius:16,background:"linear-gradient(135deg,rgba(139,92,246,0.12),rgba(99,102,241,0.08))",border:"1px solid rgba(139,92,246,0.2)",transition:"all .3s"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{width:44,height:44,borderRadius:12,background:"linear-gradient(135deg,#8b5cf6,#6366f1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>📡</div>
+            <div style={{flex:1}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:15,fontWeight:700,color:"#fff"}}>NUVO AI 브리핑</span>
+                <span style={{padding:"2px 8px",borderRadius:50,background:"rgba(139,92,246,0.2)",color:"#a78bfa",fontSize:9,fontWeight:700}}>NEW</span>
+              </div>
+              <div style={{fontSize:12,color:T.dim,marginTop:2}}>나의 사주 × 실시간 시장 = 맞춤 투자 시그널</div>
+            </div>
+            <span style={{color:"#a78bfa",fontSize:18}}>→</span>
+          </div>
+        </div>}
+
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {[
             {emoji:"🔮",title:"사주 분석",desc:"종합 사주명리 분석",fn:()=>setPg("input")},
@@ -567,7 +581,18 @@ export default function SajuApp(){
 
         <div style={{display:"flex",gap:4,marginBottom:12}}>{[{k:"result",l:"📜 분석"},{k:"chat",l:"💬 질문"},{k:"share",l:"📤 공유"}].map(t=><Pill key={t.k} active={tab===t.k} onClick={()=>setTab(t.k)} style={{flex:1,textAlign:"center"}}>{t.l}</Pill>)}</div>
 
-        {tab==="result"&&<Card><Md text={rd}/>{mode==="basic"&&!prem&&<div style={{position:"relative",margin:"20px 0",borderRadius:14,overflow:"hidden"}}><div style={{filter:"blur(4px)",opacity:.1,height:80,background:T.surface}}/><div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}><span style={{fontSize:13,fontWeight:600,color:T.text}}>재물운, 연애운, 동서양 통합 분석...</span><Btn primary onClick={()=>setPw(true)} style={{padding:"10px 24px",fontSize:13}}>프리미엄으로 열기 ✦</Btn></div></div>}</Card>}
+        {tab==="result"&&<Card><Md text={rd}/>
+          {saju&&<div onClick={()=>window.location.href=`/briefing?tab=fortune&birth=${savedYear}-${month}-${day}-${hourFromSijin(sijin)||12}`} style={{cursor:"pointer",margin:"20px 0",padding:"16px 18px",borderRadius:14,background:"linear-gradient(135deg,rgba(16,185,129,0.08),rgba(139,92,246,0.06))",border:"1px solid rgba(139,92,246,0.15)",transition:"all .3s"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:24}}>📈</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:"#fff",letterSpacing:"-0.02em"}}>나의 재물운 × 시장 시그널</div>
+                <div style={{fontSize:12,color:T.sub,marginTop:2}}>사주 오행 기반 맞춤 투자 시그널 확인하기</div>
+              </div>
+              <span style={{fontSize:10,padding:"4px 10px",borderRadius:50,background:"rgba(139,92,246,0.2)",color:"#a78bfa",fontWeight:700}}>보기 →</span>
+            </div>
+          </div>}
+          {mode==="basic"&&!prem&&<div style={{position:"relative",margin:"20px 0",borderRadius:14,overflow:"hidden"}}><div style={{filter:"blur(4px)",opacity:.1,height:80,background:T.surface}}/><div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}><span style={{fontSize:13,fontWeight:600,color:T.text}}>재물운, 연애운, 동서양 통합 분석...</span><Btn primary onClick={()=>setPw(true)} style={{padding:"10px 24px",fontSize:13}}>프리미엄으로 열기 ✦</Btn></div></div>}</Card>}
         {tab==="chat"&&<Card style={{minHeight:160}}>
           <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:14,justifyContent:"center"}}>{["이직 시기","재물운","연애운","건강","내년 운세","별자리 궁합","MBTI 성격"].map(t=><Pill key={t} onClick={()=>{if(chatRef.current)chatRef.current.value=t+"이 궁금해요"}}>{t}</Pill>)}</div>
           {ch.slice(1).map((m,i)=><div key={i} style={{marginBottom:12}}>{m.role==="user"&&<div style={{background:T.surface,borderRadius:10,padding:"10px 12px",borderLeft:`2px solid ${T.purple}`,marginBottom:6}}><p style={{margin:0,color:T.text,fontSize:14}}>{m.content}</p></div>}{m.role==="assistant"&&<Md text={m.content}/>}</div>)}

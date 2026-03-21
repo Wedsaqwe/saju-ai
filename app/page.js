@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    NUVO AI v1.0 — 통합 플랫폼
@@ -316,6 +316,22 @@ export default function NuvoApp(){
   const[wellRd,setWellRd]=useState("");
   const[wellLoading,setWellLoading]=useState(false);
 
+  /* ═══ TICKER STATE ═══ */
+  const[tickers,setTickers]=useState([]);
+  const[tickerLoading,setTickerLoading]=useState(false);
+  const tickerRef=useRef(null);
+
+  /* ═══ INVITE STATE ═══ */
+  const[inviteCode,setInviteCode]=useState("");
+  const[inviteCopied,setInviteCopied]=useState(false);
+  const[inviteCount,setInviteCount]=useState(0);
+  const[premExpiry,setPremExpiry]=useState(null);
+
+  /* ═══ TELEGRAM STATE ═══ */
+  const[tgChatId,setTgChatId]=useState("");
+  const[tgSaved,setTgSaved]=useState(false);
+  const[tgEnabled,setTgEnabled]=useState(false);
+
   /* ═══ MY TAB STATE ═══ */
   const[appLang,setAppLang]=useState("kr");
   const[history,setHistory]=useState([]);
@@ -337,7 +353,37 @@ export default function NuvoApp(){
     }catch(e){setFreeCount(0)}
     // 히스토리 로드
     try{const h=JSON.parse(localStorage.getItem("nuvo_history")||"[]");setHistory(h)}catch(e){}
+    // 초대 코드 생성/로드
+    try{
+      let code=localStorage.getItem("nuvo_invite_code");
+      if(!code){code="NUVO"+Math.random().toString(36).slice(2,8).toUpperCase();localStorage.setItem("nuvo_invite_code",code)}
+      setInviteCode(code);
+      const cnt=parseInt(localStorage.getItem("nuvo_invite_count")||"0");
+      setInviteCount(cnt);
+      const exp=localStorage.getItem("nuvo_prem_expiry");
+      if(exp){setPremExpiry(exp);if(new Date(exp)>new Date()){setPrem(true)}}
+    }catch(e){}
+    // Telegram 설정 로드
+    try{
+      const tg=localStorage.getItem("nuvo_tg_chatid");
+      if(tg){setTgChatId(tg);setTgSaved(true);setTgEnabled(true)}
+    }catch(e){}
+    // 마켓 티커 로드
+    fetchTickers();
+    const tickerInterval=setInterval(fetchTickers,5*60*1000); // 5분마다
+    return()=>clearInterval(tickerInterval);
   },[]);
+
+  // URL 파라미터로 초대 체크
+  useEffect(()=>{
+    try{
+      const params=new URLSearchParams(window.location.search);
+      const ref=params.get("ref");
+      if(ref&&ref!==inviteCode&&ref.startsWith("NUVO")){
+        localStorage.setItem("nuvo_referred_by",ref);
+      }
+    }catch(e){}
+  },[inviteCode]);
 
   function useFreeCount(){
     try{
@@ -355,6 +401,82 @@ export default function NuvoApp(){
       const h=[{type,name,date:new Date().toISOString().slice(0,10)},...history].slice(0,20);
       setHistory(h);
       localStorage.setItem("nuvo_history",JSON.stringify(h));
+    }catch(e){}
+  }
+
+  /* ═══ TICKER FETCH ═══ */
+  async function fetchTickers(){
+    try{
+      setTickerLoading(true);
+      // 무료 API: 주요 지수/환율/코인 시세
+      const symbols=[
+        {name:"KOSPI",url:"https://api.coinpaprika.com/v1/tickers/btc-bitcoin",fallback:true},
+      ];
+      // CoinPaprika 무료 API로 BTC, ETH + 고정 시세 표시
+      const r=await fetch("https://api.coinpaprika.com/v1/tickers?quotes=USD&limit=5");
+      const data=await r.json();
+      const mapped=data.slice(0,4).map(c=>({
+        name:c.symbol,
+        price:c.quotes?.USD?.price?.toFixed(c.quotes?.USD?.price>100?0:2)||"—",
+        change:c.quotes?.USD?.percent_change_24h?.toFixed(1)||"0",
+      }));
+      // 고정 항목 추가 (실시간 아님, 참고용)
+      const staticTickers=[
+        {name:"KOSPI",price:"2,610",change:"+0.3",isStatic:true},
+        {name:"USD/KRW",price:"1,382",change:"-0.1",isStatic:true},
+      ];
+      setTickers([...staticTickers,...mapped]);
+    }catch(e){
+      setTickers([
+        {name:"KOSPI",price:"2,610",change:"+0.3",isStatic:true},
+        {name:"USD/KRW",price:"1,382",change:"-0.1",isStatic:true},
+        {name:"BTC",price:"—",change:"0",isStatic:true},
+        {name:"ETH",price:"—",change:"0",isStatic:true},
+      ]);
+    }finally{setTickerLoading(false)}
+  }
+
+  /* ═══ INVITE FUNCTIONS ═══ */
+  function copyInviteLink(){
+    const link=`https://saju-ai-one.vercel.app?ref=${inviteCode}`;
+    navigator.clipboard.writeText(link);
+    setInviteCopied(true);
+    setTimeout(()=>setInviteCopied(false),2000);
+  }
+  function grantInviteReward(){
+    // 초대 성사 시: 본인에게 프리미엄 3일 부여
+    try{
+      const now=new Date();
+      const existing=premExpiry?new Date(premExpiry):now;
+      const base=existing>now?existing:now;
+      base.setDate(base.getDate()+3);
+      const newExpiry=base.toISOString().slice(0,10);
+      localStorage.setItem("nuvo_prem_expiry",newExpiry);
+      setPremExpiry(newExpiry);setPrem(true);
+      const cnt=inviteCount+1;
+      setInviteCount(cnt);
+      localStorage.setItem("nuvo_invite_count",String(cnt));
+    }catch(e){}
+  }
+
+  /* ═══ TELEGRAM FUNCTIONS ═══ */
+  function saveTelegram(){
+    if(!tgChatId.trim())return;
+    try{
+      localStorage.setItem("nuvo_tg_chatid",tgChatId.trim());
+      setTgSaved(true);setTgEnabled(true);
+    }catch(e){}
+  }
+  function removeTelegram(){
+    try{
+      localStorage.removeItem("nuvo_tg_chatid");
+      setTgChatId("");setTgSaved(false);setTgEnabled(false);
+    }catch(e){}
+  }
+  async function sendTelegramTest(){
+    if(!tgChatId.trim())return;
+    try{
+      await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId:tgChatId.trim(),message:"✅ NUVO AI 알림 연결 테스트 성공!\n매일 아침 시장 브리핑을 받아보세요."})});
     }catch(e){}
   }
 
@@ -765,19 +887,50 @@ export default function NuvoApp(){
       </div>}
 
       {/* DAILY */}
-      {pg==="daily"&&<div style={page}><Back onClick={goHome}/><PageTitle title="오늘의 운세" sub={todayFull}/><Card>{dailyLoading?<div style={{textAlign:"center",padding:30}}><Spin/></div>:<Md text={dailyRd}/>}</Card></div>}
+      {pg==="daily"&&<div style={page}><Back onClick={goHome}/><PageTitle title="오늘의 운세" sub={todayFull}/><Card>{dailyLoading?<div style={{textAlign:"center",padding:30}}><Spin/></div>:<Md text={dailyRd}/>}
+        {!dailyLoading&&dailyRd&&<div style={{marginTop:20,display:"flex",gap:8}}>
+          <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:`${T.amber}08`,border:`1px solid ${T.amber}15`,textAlign:"center"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("calendar")}}>
+            <span style={{fontSize:18}}>📅</span><div style={{fontSize:11,fontWeight:600,color:T.amber,marginTop:4}}>Lucky Calendar</div>
+          </div>
+          <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:"linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.06))",border:"1px solid rgba(59,130,246,0.15)",textAlign:"center"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("fortune")}}>
+            <span style={{fontSize:18}}>📈</span><div style={{fontSize:11,fontWeight:600,color:T.purple,marginTop:4}}>투자 시그널</div>
+          </div>
+        </div>}
+      </Card></div>}
 
       {/* CATEGORY */}
       {pg==="category"&&<div style={page}><Back onClick={goHome}/><PageTitle title={`${catName} 상세 분석`}/><Card>{catLoading?<div style={{textAlign:"center",padding:30}}><Spin/></div>:<Md text={catRd}/>}
         {/* CTA: 해당 코치로 연결 */}
-        {!catLoading&&catRd&&hasBundleSub&&(catName==="연애운"||catName==="직업운"||catName==="건강운")&&<div style={{marginTop:20,padding:16,borderRadius:14,background:`${T.purple}08`,border:`1px solid ${T.purple}15`,cursor:"pointer"}} onClick={()=>{if(catName==="연애운")startCoach("relationship");else if(catName==="직업운")startCoach("career");else doWellness()}}>
+        {!catLoading&&catRd&&(catName==="연애운"||catName==="직업운"||catName==="건강운")&&<div style={{marginTop:20,padding:16,borderRadius:14,background:`${T.purple}08`,border:`1px solid ${T.purple}15`,cursor:"pointer"}} onClick={()=>{if(!hasBundleSub){setPw(true);return}if(catName==="연애운")startCoach("relationship");else if(catName==="직업운")startCoach("career");else doWellness()}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:20}}>{catName==="연애운"?"💕":catName==="직업운"?"💼":"🏥"}</span>
             <div style={{flex:1}}>
               <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>AI {catName==="연애운"?"연애":catName==="직업운"?"커리어":"웰니스"} 코치</div>
-              <div style={{fontSize:12,color:T.dim}}>더 깊은 맞춤 상담 받기</div>
+              <div style={{fontSize:12,color:T.dim}}>{hasBundleSub?"더 깊은 맞춤 상담 받기":"번들 구독으로 AI 코치 이용하기"}</div>
             </div>
-            <span style={{color:T.purple,fontSize:14}}>→</span>
+            <span style={{color:T.purple,fontSize:14}}>{hasBundleSub?"→":"✦"}</span>
+          </div>
+        </div>}
+        {/* CTA: 재물운 → 브리핑 */}
+        {!catLoading&&catRd&&catName==="재물운"&&hasSaju&&<div style={{marginTop:12,padding:16,borderRadius:14,background:"linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.06))",border:"1px solid rgba(59,130,246,0.15)",cursor:"pointer"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("fortune")}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>📈</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>재물운 × 시장 시그널</div>
+              <div style={{fontSize:12,color:T.dim}}>오행 맞춤 투자 시그널 확인하기</div>
+            </div>
+            <span style={{color:T.blue,fontSize:14}}>→</span>
+          </div>
+        </div>}
+        {/* CTA: 행운 → Lucky Calendar */}
+        {!catLoading&&catRd&&catName==="행운"&&hasSaju&&<div style={{marginTop:12,padding:16,borderRadius:14,background:`${T.amber}08`,border:`1px solid ${T.amber}15`,cursor:"pointer"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("calendar")}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>📅</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>Lucky Timing Calendar</div>
+              <div style={{fontSize:12,color:T.dim}}>행운의 날짜 확인하기</div>
+            </div>
+            <span style={{color:T.amber,fontSize:14}}>→</span>
           </div>
         </div>}
       </Card></div>}
@@ -785,7 +938,19 @@ export default function NuvoApp(){
       {/* TAROT */}
       {pg==="tarot"&&<div style={page}><Back onClick={goFortune}/><PageTitle emoji="🎴" title="타로 카드" sub="카드를 하나씩 뒤집어 보세요"/>
         <div style={{display:"flex",justifyContent:"center",gap:12,marginBottom:14}}>{["과거","현재","미래"].map((l,i)=><div key={i} style={{textAlign:"center"}}><div style={{fontSize:10,color:T.dim,marginBottom:6}}>{l}</div>{tCards[i]&&<TCard card={tCards[i]} flipped={tFlip[i]} onClick={()=>flipTarot(i)} delay={i*.12}/>}</div>)}</div>
-        {tFlip.every(Boolean)&&<Card>{tLoading?<div style={{textAlign:"center",padding:20}}><Spin color={T.gold}/></div>:<Md text={tRd}/>}</Card>}
+        {tFlip.every(Boolean)&&<Card>{tLoading?<div style={{textAlign:"center",padding:20}}><Spin color={T.gold}/></div>:<Md text={tRd}/>}
+          {!tLoading&&tRd&&<div style={{marginTop:16,display:"flex",gap:6}}>
+            <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:`${T.pink}08`,border:`1px solid ${T.pink}15`,textAlign:"center"}} onClick={()=>{if(hasBundleSub)startCoach("relationship");else setPw(true)}}>
+              <span style={{fontSize:16}}>💕</span><div style={{fontSize:11,fontWeight:600,color:T.pink,marginTop:4}}>연애 코치</div>
+            </div>
+            <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:`${T.blue}08`,border:`1px solid ${T.blue}15`,textAlign:"center"}} onClick={()=>{if(hasBundleSub)startCoach("career");else setPw(true)}}>
+              <span style={{fontSize:16}}>💼</span><div style={{fontSize:11,fontWeight:600,color:T.blue,marginTop:4}}>커리어 코치</div>
+            </div>
+            <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:"linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.06))",border:"1px solid rgba(59,130,246,0.15)",textAlign:"center"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("fortune")}}>
+              <span style={{fontSize:16}}>📈</span><div style={{fontSize:11,fontWeight:600,color:T.purple,marginTop:4}}>시그널</div>
+            </div>
+          </div>}
+        </Card>}
       </div>}
 
       {/* ASTRO */}
@@ -795,7 +960,11 @@ export default function NuvoApp(){
           <Pill active color={ELEM_COLOR[zodiac.element]}>{zodiac.element} 원소</Pill>
           <Pill active color={T.purple}>🪐 {zodiac.planet}</Pill>
         </div>}
-        <Card>{astroLoading?<div style={{textAlign:"center",padding:30}}><Spin color={T.gold}/></div>:<Md text={astroRd}/>}</Card>
+        <Card>{astroLoading?<div style={{textAlign:"center",padding:30}}><Spin color={T.gold}/></div>:<Md text={astroRd}/>}
+          {!astroLoading&&astroRd&&<div style={{marginTop:20,cursor:"pointer",padding:14,borderRadius:12,background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(16,185,129,0.04))",border:"1px solid rgba(139,92,246,0.15)"}} onClick={()=>{if(prem)doIntegrated();else setPw(true)}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>🌌</span><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"#fff"}}>통합 리포트</div><div style={{fontSize:11,color:T.dim}}>사주 × 점성술 × MBTI 교차 분석</div></div><span style={{color:T.purple,fontSize:12}}>{prem?"→":"✦"}</span></div>
+          </div>}
+        </Card>
       </div>}
 
       {/* MBTI */}
@@ -813,13 +982,27 @@ export default function NuvoApp(){
           <div style={{padding:"10px 14px",borderRadius:10,background:`${T.gold}08`,border:`1px solid ${T.gold}12`}}>
             <p style={{fontSize:12,color:T.sub,lineHeight:1.7,margin:0}}>⚠️ 학술 연구 기반 <strong style={{color:T.text}}>재미 목적의 추정</strong>이며, 정식 MBTI 검사를 대체하지 않습니다.</p>
           </div>
+          {/* MBTI → 통합 리포트 크로스셀 */}
+          <div style={{marginTop:16,cursor:"pointer",padding:14,borderRadius:12,background:"linear-gradient(135deg,rgba(139,92,246,0.08),rgba(16,185,129,0.04))",border:"1px solid rgba(139,92,246,0.15)"}} onClick={()=>{if(prem)doIntegrated();else setPw(true)}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>🌌</span><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"#fff"}}>통합 리포트에서 MBTI 심층 분석</div><div style={{fontSize:11,color:T.dim}}>사주 × 점성술 × MBTI 교차 검증</div></div><span style={{color:T.purple,fontSize:12}}>{prem?"→":"✦"}</span></div>
+          </div>
         </Card>}
       </div>}
 
       {/* INTEGRATED */}
       {pg==="integrated"&&<div style={page}><Back onClick={goFortune}/><PageTitle emoji="🌌" title="통합 리포트" sub="사주 × 점성술 × MBTI"/>
         {zodiac&&mbti&&<div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:20,flexWrap:"wrap"}}><Pill active>☯ 사주</Pill><Pill active color={ELEM_COLOR[zodiac.element]}>{zodiac.symbol} {zodiac.sign}</Pill><Pill active color={T.green}>🧠 {mbti}</Pill></div>}
-        <Card>{intLoading?<div style={{textAlign:"center",padding:40}}><Spin/><p style={{fontSize:13,color:T.dim,marginTop:14}}>세 체계를 융합 분석 중...</p></div>:<Md text={intRd}/>}</Card>
+        <Card>{intLoading?<div style={{textAlign:"center",padding:40}}><Spin/><p style={{fontSize:13,color:T.dim,marginTop:14}}>세 체계를 융합 분석 중...</p></div>:<Md text={intRd}/>}
+          {/* 통합 리포트 → 코치/브리핑 크로스셀 */}
+          {!intLoading&&intRd&&<div style={{marginTop:20,display:"flex",flexDirection:"column",gap:8}}>
+            <div style={{cursor:"pointer",padding:14,borderRadius:12,background:"linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.06))",border:"1px solid rgba(59,130,246,0.15)"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("fortune")}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>📈</span><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"#fff"}}>Fortune × Signal</div><div style={{fontSize:11,color:T.dim}}>사주 맞춤 투자 시그널</div></div><span style={{color:T.blue,fontSize:12}}>→</span></div>
+            </div>
+            {[{emoji:"💕",t:"연애 코치",c:T.pink,fn:()=>{if(hasBundleSub)startCoach("relationship");else setPw(true)}},{emoji:"💼",t:"커리어 코치",c:T.blue,fn:()=>{if(hasBundleSub)startCoach("career");else setPw(true)}},{emoji:"🏥",t:"웰니스 가이드",c:T.green,fn:()=>{if(hasBundleSub)doWellness();else setPw(true)}}].map((x,i)=><div key={i} style={{cursor:"pointer",padding:14,borderRadius:12,background:`${x.c}08`,border:`1px solid ${x.c}15`}} onClick={x.fn}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>{x.emoji}</span><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"#fff"}}>{x.t}</div></div><span style={{color:x.c,fontSize:12}}>{hasBundleSub?"→":"✦"}</span></div>
+            </div>)}
+          </div>}
+        </Card>
       </div>}
 
       {/* FACE MENU */}
@@ -841,7 +1024,11 @@ export default function NuvoApp(){
       </div>}
 
       {/* FACE RESULT */}
-      {pg==="face"&&<div style={page}><Back onClick={goFortune}/><PageTitle title={`${faceMode==="photo"?"사진":"사주"} 관상 분석`}/><Card>{faceLoading?<div style={{textAlign:"center",padding:30}}><Spin color={T.green}/></div>:<Md text={faceRd}/>}</Card></div>}
+      {pg==="face"&&<div style={page}><Back onClick={goFortune}/><PageTitle title={`${faceMode==="photo"?"사진":"사주"} 관상 분석`}/><Card>{faceLoading?<div style={{textAlign:"center",padding:30}}><Spin color={T.green}/></div>:<Md text={faceRd}/>}
+        {!faceLoading&&faceRd&&<div style={{marginTop:20,cursor:"pointer",padding:14,borderRadius:12,background:`${T.green}08`,border:`1px solid ${T.green}15`}} onClick={()=>{if(hasBundleSub)doWellness();else setPw(true)}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>🏥</span><div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"#fff"}}>웰니스 가이드</div><div style={{fontSize:11,color:T.dim}}>관상 + 오행 체질 기반 건강 가이드</div></div><span style={{color:T.green,fontSize:12}}>{hasBundleSub?"→":"✦"}</span></div>
+        </div>}
+      </Card></div>}
 
       {/* ═══ RESULT PAGE ═══ */}
       {pg==="result"&&saju&&<div style={{...page,maxWidth:480}}>
@@ -975,7 +1162,16 @@ export default function NuvoApp(){
             </div>)}
           </div>
         </Card>}
-        <Card>{wellLoading?<div style={{textAlign:"center",padding:30}}><Spin color={T.green}/></div>:<Md text={wellRd}/>}</Card>
+        <Card>{wellLoading?<div style={{textAlign:"center",padding:30}}><Spin color={T.green}/></div>:<Md text={wellRd}/>}
+          {!wellLoading&&wellRd&&<div style={{marginTop:20,display:"flex",gap:8}}>
+            <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:"linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.06))",border:"1px solid rgba(59,130,246,0.15)",textAlign:"center"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("fortune")}}>
+              <span style={{fontSize:18}}>📈</span><div style={{fontSize:11,fontWeight:600,color:T.purple,marginTop:4}}>투자 시그널</div>
+            </div>
+            <div style={{flex:1,cursor:"pointer",padding:12,borderRadius:12,background:`${T.amber}08`,border:`1px solid ${T.amber}15`,textAlign:"center"}} onClick={()=>{setMainTab("briefing");setPg("briefingHub");setBriefSub("calendar")}}>
+              <span style={{fontSize:18}}>📅</span><div style={{fontSize:11,fontWeight:600,color:T.amber,marginTop:4}}>Lucky Calendar</div>
+            </div>
+          </div>}
+        </Card>
       </div>}
 
       {/* ═══════════════════════════════════════
@@ -996,6 +1192,22 @@ export default function NuvoApp(){
         <div style={{display:"flex",gap:4,marginBottom:16}}>
           {[{k:"daily",l:"📰 브리핑"},{k:"fortune",l:"🔮 시그널"},{k:"calendar",l:"📅 캘린더"}].map(s=><Pill key={s.k} active={briefSub===s.k} onClick={()=>setBriefSub(s.k)} style={{flex:1,textAlign:"center",fontSize:12}}>{s.l}</Pill>)}
         </div>
+
+        {/* Ticker Strip */}
+        {tickers.length>0&&<div style={{marginBottom:14,overflow:"hidden",borderRadius:10,background:T.surface,border:`1px solid ${T.border}`,padding:"8px 0"}}>
+          <div ref={tickerRef} style={{display:"flex",gap:16,paddingLeft:12,paddingRight:12,overflowX:"auto",scrollbarWidth:"none",msOverflowStyle:"none"}}>
+            {tickers.map((t,i)=>{
+              const up=parseFloat(t.change)>0;const down=parseFloat(t.change)<0;
+              return <div key={i} style={{display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap",flexShrink:0}}>
+                <span style={{fontSize:11,fontWeight:700,color:T.sub,fontFamily:"'JetBrains Mono','Geist',monospace"}}>{t.name}</span>
+                <span style={{fontSize:12,fontWeight:600,color:"#fff",fontFamily:"'JetBrains Mono',monospace"}}>{typeof t.price==="number"?t.price.toLocaleString():t.price}</span>
+                <span style={{fontSize:10,fontWeight:700,color:up?T.green:down?T.red:T.dim,fontFamily:"'JetBrains Mono',monospace"}}>{up?"+":""}{t.change}%</span>
+                {t.isStatic&&<span style={{fontSize:7,color:T.dim}}>*</span>}
+                {i<tickers.length-1&&<span style={{color:T.border,fontSize:10}}>│</span>}
+              </div>;
+            })}
+          </div>
+        </div>}
 
         {/* Daily Briefing */}
         {briefSub==="daily"&&<div>
@@ -1254,15 +1466,65 @@ export default function NuvoApp(){
         </Card>
 
         {/* 친구 초대 */}
-        <Card style={{marginBottom:12,cursor:"pointer"}} onClick={()=>{navigator.clipboard.writeText("https://saju-ai-one.vercel.app?ref=invite")}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <Card style={{marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
             <span style={{fontSize:22}}>🎁</span>
             <div style={{flex:1}}>
               <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>친구 초대</div>
-              <div style={{fontSize:12,color:T.dim}}>초대 시 프리미엄 3일 무료</div>
+              <div style={{fontSize:12,color:T.dim}}>초대 1명당 프리미엄 3일 무료</div>
             </div>
-            <span style={{fontSize:10,padding:"4px 10px",borderRadius:50,background:`${T.green}15`,color:T.green,fontWeight:700}}>링크 복사</span>
           </div>
+          {/* 초대 코드 + 링크 */}
+          <div style={{padding:14,borderRadius:12,background:T.surface,border:`1px solid ${T.border}`,marginBottom:10}}>
+            <div style={{fontSize:10,color:T.dim,marginBottom:6}}>나의 초대 코드</div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:16,fontWeight:800,color:T.purple,fontFamily:"'JetBrains Mono','Geist',monospace",letterSpacing:2,flex:1}}>{inviteCode}</span>
+              <button onClick={copyInviteLink} style={{padding:"6px 14px",borderRadius:50,border:`1px solid ${T.purple}30`,background:`${T.purple}12`,color:T.purple,fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>{inviteCopied?"복사됨 ✓":"링크 복사"}</button>
+            </div>
+          </div>
+          {/* 초대 현황 */}
+          <div style={{display:"flex",gap:8}}>
+            <div style={{flex:1,padding:10,borderRadius:10,background:T.surface,border:`1px solid ${T.border}`,textAlign:"center"}}>
+              <div style={{fontSize:18,fontWeight:800,color:T.green}}>{inviteCount}</div>
+              <div style={{fontSize:10,color:T.dim}}>초대 성공</div>
+            </div>
+            <div style={{flex:1,padding:10,borderRadius:10,background:T.surface,border:`1px solid ${T.border}`,textAlign:"center"}}>
+              <div style={{fontSize:18,fontWeight:800,color:T.purple}}>{inviteCount*3}일</div>
+              <div style={{fontSize:10,color:T.dim}}>적립된 무료</div>
+            </div>
+            <div style={{flex:1,padding:10,borderRadius:10,background:T.surface,border:`1px solid ${T.border}`,textAlign:"center"}}>
+              <div style={{fontSize:14,fontWeight:700,color:premExpiry?T.green:T.dim}}>{premExpiry||"—"}</div>
+              <div style={{fontSize:10,color:T.dim}}>만료일</div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Telegram 알림 설정 */}
+        <Card style={{marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+            <span style={{fontSize:22}}>📬</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>Telegram 알림</div>
+              <div style={{fontSize:12,color:T.dim}}>매일 아침 시장 브리핑 수신</div>
+            </div>
+            {tgEnabled&&<span style={{fontSize:10,padding:"4px 10px",borderRadius:50,background:`${T.green}15`,color:T.green,fontWeight:700}}>ON</span>}
+          </div>
+          {!tgSaved?<div>
+            <div style={{padding:10,borderRadius:10,background:`${T.blue}08`,border:`1px solid ${T.blue}12`,marginBottom:10}}>
+              <p style={{fontSize:12,color:T.sub,lineHeight:1.6,margin:0}}>1. Telegram에서 <strong style={{color:T.text}}>@NuvoAI_bot</strong> 검색 후 /start<br/>2. 받은 Chat ID를 아래에 입력</p>
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <input value={tgChatId} onChange={e=>setTgChatId(e.target.value)} placeholder="Chat ID 입력" style={{...INP,flex:1,fontSize:13}}/>
+              <Btn primary onClick={()=>{saveTelegram();sendTelegramTest()}} style={{padding:"10px 18px",fontSize:12,whiteSpace:"nowrap"}}>연결</Btn>
+            </div>
+          </div>:<div>
+            <div style={{display:"flex",alignItems:"center",gap:8,padding:12,borderRadius:10,background:T.surface,border:`1px solid ${T.border}`}}>
+              <span style={{fontSize:12,color:T.green}}>✓</span>
+              <span style={{fontSize:13,color:T.sub,flex:1}}>Chat ID: {tgChatId.slice(0,4)}****</span>
+              <button onClick={sendTelegramTest} style={{background:"none",border:`1px solid ${T.border}`,borderRadius:50,padding:"4px 12px",color:T.dim,fontSize:11,cursor:"pointer"}}>테스트</button>
+              <button onClick={removeTelegram} style={{background:"none",border:`1px solid ${T.red}30`,borderRadius:50,padding:"4px 12px",color:T.red,fontSize:11,cursor:"pointer"}}>해제</button>
+            </div>
+          </div>}
         </Card>
 
         {/* 앱 정보 */}

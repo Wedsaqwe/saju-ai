@@ -5,386 +5,340 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI 사주명리 — 동서양 융합 운명 분석</title>
 <meta name="description" content="사주팔자 × 서양 점성술 × MBTI를 AI가 교차검증합니다. 무료로 당신의 운명을 읽어보세요.">
-
-<!-- OG Meta -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="AI 사주명리 — 세 체계가 가리키는 하나의 결론">
-<meta property="og:description" content="사주 × 별자리 × MBTI를 AI가 교차검증. 무료로 당신의 운명을 읽어보세요.">
-<meta property="og:url" content="https://saju-ai-one.vercel.app/landing.html">
-<meta property="og:image" content="https://saju-ai-one.vercel.app/og-image.png">
-<meta property="og:site_name" content="AI 사주명리">
-<meta property="og:locale" content="ko_KR">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AI 사주명리 — 세 체계가 가리키는 하나의 결론">
-<meta name="twitter:description" content="사주 × 별자리 × MBTI를 AI가 교차검증. 무료 분석.">
-<meta name="twitter:image" content="https://saju-ai-one.vercel.app/og-image.png">
-
-<!-- Favicon -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☯</text></svg>">
-
-<!-- Google Analytics 4 (GA ID를 발급받은 후 G-XXXXXXXXXX를 교체하세요) -->
-<!--
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
--->
-
-<!-- Meta Pixel (인스타/페북 광고 시 픽셀 ID를 발급받은 후 활성화) -->
-<!--
-<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','YOUR_PIXEL_ID');fbq('track','PageView');</script>
--->
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#050508;--surface:#0a0a0f;--card:#111118;--border:#1a1a24;
-  --purple:#a78bfa;--purple2:#8b5cf6;--pink:#f472b6;--gold:#fbbf24;--green:#34d399;--blue:#60a5fa;
-  --text:#f0eeff;--sub:#9891b0;--dim:#4a4560;--radius:16px;
+  --bg:#07060F;--bg2:#0C0A1A;--purple:#A78BFA;--purple2:#7C5CFC;
+  --pink:#F472B6;--gold:#FBBF24;--green:#34D399;--blue:#60A5FA;
+  --text:#E0D4FF;--muted:#6B5F8A;--dim:#3A3454;
 }
 html{scroll-behavior:smooth}
-body{font-family:'SUIT Variable','SUIT',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em;line-height:1.6}
-a{color:inherit;text-decoration:none}
-.container{max-width:1080px;margin:0 auto;padding:0 24px}
+body{font-family:'SUIT Variable','SUIT','Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:'ss01' on;letter-spacing:-0.01em}
+
+/* Stars */
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#fff}
+
+/* Sections */
 section{position:relative;z-index:1}
 
-/* Reveal */
-.r{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
-.r.v{opacity:1;transform:translateY(0)}
-.r.d1{transition-delay:.1s}.r.d2{transition-delay:.2s}.r.d3{transition-delay:.3s}.r.d4{transition-delay:.4s}
-
 /* Hero */
-.hero{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.05),transparent 70%);top:30%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.hero-eyebrow{font-size:13px;font-weight:600;color:var(--purple);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}
-.hero h1{font-size:clamp(40px,9vw,72px);font-weight:900;line-height:1.05;letter-spacing:-0.045em;color:#fff;margin-bottom:20px}
-.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:clamp(16px,3vw,20px);font-weight:400;color:var(--sub);max-width:480px;margin:0 auto 40px;line-height:1.6;letter-spacing:-0.01em}
-.cta{display:inline-flex;align-items:center;gap:8px;padding:16px 40px;border-radius:50px;background:#fff;color:#000;font-size:16px;font-weight:700;letter-spacing:-0.02em;border:none;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1)}
-.cta:hover{transform:scale(1.04);box-shadow:0 0 40px rgba(255,255,255,.1)}
-.cta-purple{background:var(--purple2);color:#fff}
-.cta-purple:hover{box-shadow:0 0 40px rgba(139,92,246,.3)}
-.hero-note{font-size:13px;color:var(--dim);margin-top:16px}
+.hero{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.06),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:breathe 6s ease infinite}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.1);font-size:11px;color:var(--purple);font-weight:600;letter-spacing:1px;margin-bottom:20px;animation:fadeUp .8s ease both}
+.hero-title{font-family:'Geist','SUIT Variable','SUIT','Pretendard',-apple-system,sans-serif;font-size:clamp(32px,8vw,56px);font-weight:900;line-height:1.12;color:#fff;margin-bottom:16px;animation:fadeUp .8s ease .15s both;letter-spacing:-0.04em}
+.hero-title span{background:linear-gradient(135deg,var(--purple),var(--pink),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(14px,3.5vw,18px);color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto 32px;animation:fadeUp .8s ease .3s both;font-weight:400;letter-spacing:-0.02em}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;padding:16px 36px;border-radius:14px;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;font-size:16px;font-weight:700;text-decoration:none;border:none;cursor:pointer;animation:fadeUp .8s ease .45s both;transition:transform .2s,box-shadow .2s;letter-spacing:-0.02em;font-family:'SUIT Variable','SUIT','Pretendard',-apple-system,sans-serif}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(167,139,250,.3)}
+.hero-free{font-size:12px;color:var(--dim);margin-top:12px;animation:fadeUp .8s ease .55s both}
+.scroll-hint{position:absolute;bottom:24px;animation:bounce 2s ease infinite}
+.scroll-hint span{display:block;width:2px;height:12px;background:var(--dim);margin:0 auto;border-radius:1px}
 
-/* Section titles */
-.sec-label{font-size:13px;font-weight:600;color:var(--purple);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
-.sec-title{font-size:clamp(28px,6vw,48px);font-weight:800;line-height:1.1;letter-spacing:-0.04em;color:#fff;margin-bottom:16px}
-.sec-sub{font-size:clamp(15px,2.5vw,18px);font-weight:400;color:var(--sub);max-width:520px;line-height:1.6}
-.sec-center{text-align:center}
-.sec-center .sec-sub{margin:0 auto}
+/* Feature badges row */
+.badges-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:28px;animation:fadeUp .8s ease .35s both}
+.badge-item{padding:5px 12px;border-radius:10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px}
 
-/* Phone mockups */
-.phone-section{padding:120px 0;overflow:hidden}
-.phone-grid{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:60px}
-.phone{width:240px;background:var(--card);border-radius:28px;border:1px solid var(--border);padding:12px;transition:transform .4s cubic-bezier(.16,1,.3,1)}
-.phone:hover{transform:translateY(-8px)}
-.phone-screen{border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#0B0A1A,#140E2E);aspect-ratio:9/19.5;display:flex;flex-direction:column;padding:16px 12px;font-size:11px}
-.phone-notch{width:80px;height:6px;background:var(--bg);border-radius:3px;margin:0 auto 12px}
-.phone-title{font-size:14px;font-weight:700;color:#fff;text-align:center;margin-bottom:8px}
-.phone-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:600;margin:2px}
-.phone-badges{text-align:center;margin-bottom:10px}
-.screen-saju .pillar-row{display:flex;justify-content:center;gap:8px;margin:8px 0}
-.screen-saju .p{text-align:center}
-.screen-saju .p-char{font-size:20px;font-weight:300;color:#fff;line-height:1.1}
-.screen-saju .p-label{font-size:7px;color:var(--dim)}
-.screen-saju .p-oh{font-size:7px;font-weight:600;margin-top:1px}
-.screen-saju .oh-bar{display:flex;gap:1px;height:4px;border-radius:2px;overflow:hidden;margin:8px 0}
-.screen-saju .oh-bar div{border-radius:1px;opacity:.6}
-.ap{font-size:9px;color:#b4a8d2;line-height:1.7;margin-top:6px}
-.ap strong{color:#e0d4ff}
-.screen-zodiac .z-sym{font-size:36px;text-align:center;margin:8px 0 4px}
-.screen-zodiac .z-name{font-size:16px;font-weight:700;color:#fff;text-align:center}
-.screen-zodiac .z-tags{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin:6px 0}
-.screen-zodiac .z-tags span{padding:2px 6px;border-radius:4px;font-size:8px;font-weight:600}
-.screen-int .i-badges{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;margin:6px 0}
-.screen-int .i-badges span{padding:2px 5px;border-radius:4px;font-size:7px;font-weight:600}
+/* Demo section */
+.demo{padding:80px 20px;background:linear-gradient(180deg,var(--bg),var(--bg2),var(--bg))}
+.demo-title{text-align:center;font-family:'Geist','SUIT Variable','SUIT','Pretendard',-apple-system,sans-serif;font-size:clamp(22px,5vw,32px);font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.03em}
+.demo-sub{text-align:center;font-size:14px;color:var(--muted);margin-bottom:40px}
+
+/* Fake analysis card */
+.analysis-card{max-width:380px;margin:0 auto;background:rgba(255,255,255,.025);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.06);border-radius:20px;overflow:hidden}
+.analysis-header{padding:20px 20px 16px;border-bottom:1px solid rgba(167,139,250,.06);display:flex;align-items:center;justify-content:space-between}
+.analysis-name{font-size:15px;font-weight:600;color:#fff}
+.analysis-badges{display:flex;gap:4px}
+.analysis-badges span{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
+.analysis-saju{padding:16px 20px;display:flex;justify-content:center;gap:18px;border-bottom:1px solid rgba(167,139,250,.06)}
+.pillar{text-align:center}
+.pillar-label{font-size:9px;color:var(--dim);margin-bottom:4px}
+.pillar-char{font-size:28px;font-weight:300;color:#fff;line-height:1.1}
+.pillar-sub{font-size:8px;font-weight:600;margin-top:2px}
+.oh-bar{display:flex;gap:2px;height:5px;border-radius:3px;overflow:hidden;margin:0 20px 12px}
+.oh-bar div{border-radius:2px;opacity:.5}
+.analysis-body{padding:20px}
+.analysis-body h3{font-size:15px;font-weight:700;color:var(--purple);margin-bottom:8px;letter-spacing:-0.03em}
+.analysis-body p{font-size:14px;color:#B4A8D2;line-height:1.85;margin-bottom:12px}
+.analysis-body .highlight{background:rgba(167,139,250,.06);border-left:2px solid var(--purple);padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:16px}
+.analysis-body .highlight p{margin:0;font-size:13px}
+.blur-overlay{position:relative;padding:20px;margin-top:-1px}
+.blur-overlay::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent,var(--bg2) 80%)}
+.blur-content{filter:blur(5px);opacity:.3}
+.blur-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:2}
+.blur-cta p{font-size:14px;font-weight:600;color:#fff}
+.blur-cta a{padding:10px 24px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;font-size:13px;font-weight:600;text-decoration:none}
 
 /* Features */
-.feat-section{padding:120px 0}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:48px}
-.feat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px 28px;transition:border-color .3s}
-.feat:hover{border-color:rgba(167,139,250,.2)}
-.feat-emoji{font-size:32px;margin-bottom:14px}
-.feat-name{font-size:17px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:-0.02em}
-.feat-desc{font-size:14px;color:var(--sub);line-height:1.65}
-.feat-tag{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600}
+.features{padding:80px 20px}
+.features-grid{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.feature-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:24px 20px;transition:transform .2s,border-color .2s}
+.feature-card:hover{transform:translateY(-4px);border-color:rgba(167,139,250,.15)}
+.feature-icon{font-size:28px;margin-bottom:10px}
+.feature-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-0.03em}
+.feature-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.feature-tag{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
 
-/* Reviews — auto-scrolling carousel */
-.review-section{padding:120px 0;background:var(--surface);overflow:hidden}
-.review-track-wrap{position:relative;margin-top:48px}
-.review-track-wrap::before,.review-track-wrap::after{content:'';position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
-.review-track-wrap::before{left:0;background:linear-gradient(90deg,var(--surface),transparent)}
-.review-track-wrap::after{right:0;background:linear-gradient(270deg,var(--surface),transparent)}
-.review-track{display:flex;gap:16px;animation:scrollLeft 60s linear infinite;width:max-content}
-.review-track:hover{animation-play-state:paused}
-@keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.rev{flex:0 0 320px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:0;overflow:hidden;transition:border-color .3s}
-.rev:hover{border-color:rgba(167,139,250,.2)}
-.rev-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.rev-user{display:flex;align-items:center;gap:10px}
-.rev-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff}
-.rev-name{font-size:13px;font-weight:600;color:var(--text)}
-.rev-meta{font-size:11px;color:var(--dim)}
-.rev-badges{display:flex;gap:4px}
-.rev-badges span{padding:2px 7px;border-radius:50px;font-size:9px;font-weight:600}
-.rev-body{padding:16px 20px 20px}
-.rev-stars{color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:10px}
-.rev-text{font-size:14px;color:var(--sub);line-height:1.8}
-.rev-text strong{color:var(--text);font-weight:600}
-.rev-feat{margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.06);font-size:12px;color:var(--purple);font-weight:500}
-
-/* Second row — reverse direction */
-.review-track-2{animation:scrollRight 55s linear infinite}
-@keyframes scrollRight{0%{transform:translateX(-50%)}100%{transform:translateX(0)}}
-.review-track-2:hover{animation-play-state:paused}
-
-.review-count{text-align:center;margin-top:32px;font-size:13px;color:var(--dim)}
-.review-count strong{color:var(--purple);font-weight:700}
+/* Reviews */
+.reviews{padding:80px 20px;background:linear-gradient(180deg,var(--bg),var(--bg2))}
+.review-scroll{max-width:720px;margin:0 auto;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:12px;scrollbar-width:none}
+.review-scroll::-webkit-scrollbar{display:none}
+.review-card{flex:0 0 280px;scroll-snap-align:start;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:20px}
+.review-stars{color:var(--gold);font-size:12px;margin-bottom:8px;letter-spacing:2px}
+.review-text{font-size:14px;color:#B4A8D2;line-height:1.8;margin-bottom:12px}
+.review-text strong{color:var(--text)}
+.review-author{font-size:12px;color:var(--dim)}
 
 /* Comparison */
-.comp-section{padding:120px 0}
-.comp-table{width:100%;max-width:640px;margin:48px auto 0;border-collapse:collapse}
-.comp-table th,.comp-table td{padding:12px 10px;text-align:center;font-size:13px;border-bottom:1px solid var(--border)}
-.comp-table th{color:var(--dim);font-weight:600;font-size:12px}
-.comp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
-.comp-table .us{color:var(--purple);font-weight:700}
-.comp-table .us-h{color:var(--purple);font-weight:700;font-size:13px;border-bottom:2px solid var(--purple2)}
-.comp-table td{color:var(--sub)}
+.comparison{padding:80px 20px}
+.comp-table{max-width:600px;margin:0 auto;border-collapse:collapse;width:100%}
+.comp-table th,.comp-table td{padding:10px 8px;text-align:center;font-size:12px;border-bottom:1px solid rgba(167,139,250,.06)}
+.comp-table th{color:var(--muted);font-weight:600;font-size:11px}
+.comp-table td:first-child{text-align:left;color:var(--text);font-weight:500;font-size:13px}
+.comp-table .us{background:rgba(167,139,250,.04);color:var(--purple);font-weight:700}
+.comp-table .us-header{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(124,92,252,.1));color:var(--purple);font-weight:700;font-size:13px}
 
-/* Final CTA */
-.final{padding:160px 24px;text-align:center}
-.final h2{font-size:clamp(32px,7vw,56px);font-weight:800;line-height:1.1;letter-spacing:-0.04em;color:#fff;margin-bottom:16px}
-.final p{font-size:16px;color:var(--sub);margin-bottom:36px}
-
-/* FAQ */
-.faq-section{padding:120px 0}
-.faq-list{max-width:640px;margin:48px auto 0}
-.faq-item{border-bottom:1px solid var(--border);overflow:hidden}
-.faq-q{width:100%;background:none;border:none;color:var(--text);font-size:15px;font-weight:600;text-align:left;padding:20px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;letter-spacing:-0.02em;font-family:inherit;line-height:1.5}
-.faq-q span{color:var(--dim);font-size:18px;transition:transform .3s;flex-shrink:0;margin-left:12px}
-.faq-q.open span{transform:rotate(45deg)}
-.faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),padding .3s}
-.faq-a.open{max-height:300px;padding-bottom:20px}
-.faq-a p{font-size:14px;color:var(--sub);line-height:1.8}
+/* CTA */
+.final-cta{padding:80px 20px;text-align:center}
+.final-cta h2{font-family:'Geist','SUIT Variable','SUIT','Pretendard',-apple-system,sans-serif;font-size:clamp(24px,6vw,36px);font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.03em}
+.final-cta p{font-size:14px;color:var(--muted);margin-bottom:28px}
 
 /* Footer */
-footer{padding:40px 24px;text-align:center;border-top:1px solid var(--border)}
-footer p{font-size:12px;color:var(--dim);line-height:1.8}
+footer{padding:30px 20px;text-align:center;border-top:1px solid rgba(167,139,250,.04)}
+footer p{font-size:11px;color:var(--dim);line-height:1.8}
 
-@media(max-width:640px){
-  .phone-grid{gap:12px}
-  .phone{width:180px}
-  .phone-screen{padding:12px 8px}
-  .feat-grid{grid-template-columns:1fr}
-  .review-grid{grid-template-columns:1fr}
-  .comp-table th,.comp-table td{padding:8px 4px;font-size:11px}
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes breathe{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
+@keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}60%{transform:translateY(-3px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Mobile adjustments */
+@media(max-width:480px){
+  .features-grid{grid-template-columns:1fr}
+  .comp-table{font-size:11px}
+  .comp-table th,.comp-table td{padding:8px 4px}
 }
 </style>
 </head>
 <body>
 
-<!-- HERO -->
+<!-- Stars background -->
+<div class="stars" id="stars"></div>
+
+<!-- Hero -->
 <section class="hero">
-  <div>
-    <p class="hero-eyebrow r">동서양 융합 AI 운명 분석</p>
-    <h1 class="r d1">세 체계가<br>가리키는<br><em>하나의 결론.</em></h1>
-    <p class="hero-sub r d2">사주명리 × 서양 점성술 × MBTI<br>AI가 교차검증하여 당신만의 운명을 읽습니다.</p>
-    <div class="r d3"><a href="https://saju-ai-one.vercel.app" class="cta">무료로 시작하기</a></div>
-    <p class="hero-note r d4">30초 완성 · 회원가입 없음 · 기본 분석 완전 무료</p>
+  <div class="hero-badge">☯ 동서양 융합 AI 운명 분석</div>
+  <h1 class="hero-title">사주 × 별자리 × MBTI<br/><span>세 체계가 가리키는<br/>하나의 결론</span></h1>
+  <p class="hero-sub">40년 경력 명리학 + 서양 점성술 + 성격 심리학<br/>AI가 세 체계를 교차검증하여 당신만의 운명을 읽습니다</p>
+  <div class="badges-row">
+    <span class="badge-item" style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.12);color:var(--purple)">☯ 사주명리</span>
+    <span class="badge-item" style="background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.12);color:var(--gold)">♈ 서양 점성술</span>
+    <span class="badge-item" style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.12);color:var(--green)">🧠 MBTI</span>
+    <span class="badge-item" style="background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.12);color:var(--pink)">👤 AI 관상</span>
   </div>
+  <a href="https://saju-ai-one.vercel.app" class="hero-cta">무료로 내 운명 보기 →</a>
+  <p class="hero-free">기본 분석 완전 무료 · 회원가입 없음 · 30초 완성</p>
+  <div class="scroll-hint"><span></span></div>
 </section>
 
-<!-- PHONE MOCKUPS -->
-<section class="phone-section">
-  <div class="container sec-center">
-    <p class="sec-label r">실제 분석 화면</p>
-    <h2 class="sec-title r d1">이렇게 나와요.</h2>
-    <p class="sec-sub r d2">무료 분석만으로도 사주 원국표, 오행 분포,<br>별자리 분석, MBTI 추정까지 한 번에.</p>
-  </div>
-  <div class="phone-grid">
-    <div class="phone r d1"><div class="phone-screen screen-saju">
-      <div class="phone-notch"></div>
-      <div class="phone-title">🔮 사주 분석</div>
-      <div class="phone-badges"><span class="phone-badge" style="background:rgba(167,139,250,.12);color:var(--purple)">壬水 일간</span><span class="phone-badge" style="background:rgba(251,191,36,.12);color:var(--gold)">🐖 돼지띠</span></div>
-      <div class="pillar-row">
-        <div class="p"><div class="p-label">시</div><div class="p-char">丙</div><div class="p-char">午</div><div class="p-oh" style="color:var(--pink)">火양</div></div>
-        <div class="p"><div class="p-label" style="color:var(--purple)">일(나)</div><div class="p-char" style="color:var(--purple)">壬</div><div class="p-char">戌</div><div class="p-oh" style="color:var(--blue)">水양</div></div>
-        <div class="p"><div class="p-label">월</div><div class="p-char">癸</div><div class="p-char">未</div><div class="p-oh" style="color:var(--blue)">水음</div></div>
-        <div class="p"><div class="p-label">년</div><div class="p-char">乙</div><div class="p-char">亥</div><div class="p-oh" style="color:var(--green)">木음</div></div>
+<!-- Demo: Real analysis example -->
+<section class="demo reveal">
+  <h2 class="demo-title">실제 분석은 이렇게 나와요</h2>
+  <p class="demo-sub">무료 분석만으로도 이 정도 깊이를 제공합니다</p>
+  
+  <div class="analysis-card">
+    <div class="analysis-header">
+      <span class="analysis-name">김민준님 · 1995.7.15 · 🐖 돼지띠</span>
+      <div class="analysis-badges">
+        <span style="background:rgba(234,179,8,.1);color:var(--gold)">♌ 사자자리</span>
+        <span style="background:rgba(52,211,153,.1);color:var(--green)">ENFP</span>
       </div>
-      <div class="oh-bar"><div style="flex:2;background:var(--green)"></div><div style="flex:2;background:var(--pink)"></div><div style="flex:1;background:var(--gold)"></div><div style="flex:.5;background:var(--purple)"></div><div style="flex:3;background:var(--blue)"></div></div>
-      <div class="ap"><strong>⚖️ 용신: 금(金)</strong><br>수 기운이 강하고 금이 부족해요. 흰색 계열과 서쪽 방위가 도움됩니다.<br><br><strong>🌟 타고난 기질</strong><br>임수 일간은 큰 바다처럼 포용력이 넓고 지혜로운 사람이에요...</div>
-    </div></div>
-
-    <div class="phone r d2"><div class="phone-screen screen-zodiac">
-      <div class="phone-notch"></div>
-      <div class="phone-title">⭐ 점성술</div>
-      <div class="z-sym">♌</div>
-      <div class="z-name">사자자리</div>
-      <div class="z-tags"><span style="background:rgba(239,68,68,.12);color:#ef4444">불 원소</span><span style="background:rgba(251,191,36,.12);color:var(--gold)">🪐 태양</span></div>
-      <div class="ap"><strong>기본 성향</strong><br>강한 카리스마와 리더십을 타고난 유형. 무대 위에서 빛나는 존재감...<br><br><strong>2026 트랜짓</strong><br>목성이 7하우스를 지나면서 파트너십 관련 기회가 확대됩니다...<br><br><strong>궁합 TOP 3</strong><br>1. 양자리 ♈ — 불×불 열정<br>2. 사수자리 ♐ — 모험 동반자<br>3. 쌍둥이자리 ♊ — 지적 자극</div>
-    </div></div>
-
-    <div class="phone r d3"><div class="phone-screen screen-int">
-      <div class="phone-notch"></div>
-      <div class="phone-title">🌌 통합 리포트</div>
-      <div class="i-badges"><span style="background:rgba(167,139,250,.12);color:var(--purple)">☯ 사주</span><span style="background:rgba(239,68,68,.12);color:#ef4444">♌ 사자</span><span style="background:rgba(52,211,153,.12);color:var(--green)">🧠 ENFP</span></div>
-      <div class="ap"><strong>🔮 세 체계의 공통 결론</strong><br>사주의 壬水, 사자자리, ENFP — 세 체계 모두 <strong>"풍부한 감성과 강한 리더십이 공존하는 인물"</strong>을 가리킵니다.<br><br><strong>💰 재물운 교차 분석</strong><br>사주의 편재 + 사자자리 창의 에너지 결합. 2026 하반기 새 수입원...<br><br><strong>🎯 인생 조언 TOP 5</strong><br>1. 금(金) 에너지 보충<br>2. 가을 중요 결정<br>3. 서쪽 방위 활용...</div>
-    </div></div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="feat-section">
-  <div class="container sec-center">
-    <p class="sec-label r">기능</p>
-    <h2 class="sec-title r d1">다른 곳에<br>없는 것들.</h2>
-  </div>
-  <div class="container"><div class="feat-grid">
-    <div class="feat r"><div class="feat-emoji">🌌</div><div class="feat-name">동서양 통합 리포트</div><div class="feat-desc">사주 × 점성술 × MBTI를 AI가 교차검증. 세 체계가 합의하는 결론을 도출합니다.</div><span class="feat-tag" style="background:rgba(139,92,246,.1);color:var(--purple2)">킬러 기능</span></div>
-    <div class="feat r d1"><div class="feat-emoji">⭐</div><div class="feat-name">서양 점성술</div><div class="feat-desc">태양 별자리 기반 2026 행성 트랜짓 분석. 사주와 교차 대조합니다.</div><span class="feat-tag" style="background:rgba(251,191,36,.1);color:var(--gold)">무료</span></div>
-    <div class="feat r d2"><div class="feat-emoji">🧠</div><div class="feat-name">사주 MBTI 추정</div><div class="feat-desc">오행 분포와 십성 구성으로 MBTI 유형을 추정. 학술 연구 기반.</div><span class="feat-tag" style="background:rgba(52,211,153,.1);color:var(--green)">무료</span></div>
-    <div class="feat r d3"><div class="feat-emoji">👤</div><div class="feat-name">AI 관상 분석</div><div class="feat-desc">사주 기반 외모 경향 추정(무료) + 셀카 관상 분석(프리미엄).</div><span class="feat-tag" style="background:rgba(244,114,182,.1);color:var(--pink)">NEW</span></div>
-    <div class="feat r d4"><div class="feat-emoji">🔮</div><div class="feat-name">AI 사주 분석</div><div class="feat-desc">격국론, 용신론, 십성론 기반. 대화형으로 추가 질문까지.</div><span class="feat-tag" style="background:rgba(167,139,250,.1);color:var(--purple)">무료 + 프리미엄</span></div>
-    <div class="feat r"><div class="feat-emoji">🎴</div><div class="feat-name">타로 카드</div><div class="feat-desc">3카드 리딩을 사주와 연결 해석. 직접 뒤집는 인터랙티브 경험.</div><span class="feat-tag" style="background:rgba(251,191,36,.1);color:var(--gold)">무료</span></div>
-  </div></div>
-</section>
-
-<!-- REVIEWS -->
-<section class="review-section">
-  <div class="container sec-center">
-    <p class="sec-label r">후기</p>
-    <h2 class="sec-title r d1">직접 써본<br>사람들.</h2>
-    <p class="sec-sub r d2" style="margin:0 auto">별점 4.9 · 누적 체험 2,400+</p>
-  </div>
-
-  <!-- Row 1: auto-scroll left -->
-  <div class="review-track-wrap r d2">
-    <div class="review-track" id="track1">
-      <!-- 8 cards — duplicated for infinite loop -->
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#7c5cfc">민</div><div><div class="rev-name">김민지</div><div class="rev-meta">28세 여 · 직장인</div></div></div><div class="rev-badges"><span style="background:rgba(234,179,8,.1);color:var(--gold)">♌ 사자</span><span style="background:rgba(52,211,153,.1);color:var(--green)">ENFP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"무료인데 <strong>분석이 진짜 길게</strong> 나와서 놀랐어요. 다른 앱은 한두 줄인데, 용신이 뭔지까지 설명해줌. 재물운에서 하반기에 부업 기회가 온다는 게 딱 맞았음."</div><div class="rev-feat">🔮 사용 기능: 무료 사주 분석 → 프리미엄 전환</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#ec4899">준</div><div><div class="rev-name">이준혁</div><div class="rev-meta">32세 남 · 프리랜서</div></div></div><div class="rev-badges"><span style="background:rgba(59,130,246,.1);color:var(--blue)">♏ 전갈</span><span style="background:rgba(167,139,250,.1);color:var(--purple)">INTJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"<strong>별자리랑 사주를 교차검증</strong>한다는 게 신기해서 해봤는데, 통합 리포트에서 세 체계가 전부 같은 방향 가리키는 거 보고 소름 돋았습니다."</div><div class="rev-feat">🌌 사용 기능: 동서양 통합 리포트</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#34d399">수</div><div><div class="rev-name">박수빈</div><div class="rev-meta">25세 여 · 대학생</div></div></div><div class="rev-badges"><span style="background:rgba(244,114,182,.1);color:var(--pink)">♓ 물고기</span><span style="background:rgba(96,165,250,.1);color:var(--blue)">INFP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"<strong>관상 분석</strong>이 생각보다 정확해서 친구들이랑 돌려봤어요. 사진 안 올려도 사주만으로 외모 경향 알려주는 게 신기함. 목(木)이 강해서 마른 체형이라는데 맞음 ㅋㅋ"</div><div class="rev-feat">👤 사용 기능: 사주 기반 관상 추정</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#f59e0b">현</div><div><div class="rev-name">최현우</div><div class="rev-meta">35세 남 · 개발자</div></div></div><div class="rev-badges"><span style="background:rgba(234,179,8,.1);color:var(--gold)">♑ 염소</span><span style="background:rgba(52,211,153,.1);color:var(--green)">ISTJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★☆</div><div class="rev-text">"무료도 충분히 좋은데 통합 리포트 보면 <strong>990원이 아깝지 않음.</strong> 분기별 운세가 구체적이라 실제로 참고합니다. 개발자인데 사주에 금(金)이 많다고 적성이 맞는다 함."</div><div class="rev-feat">🌌 사용 기능: 통합 리포트 + 직업운</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#a78bfa">지</div><div><div class="rev-name">정지은</div><div class="rev-meta">29세 여 · 마케터</div></div></div><div class="rev-badges"><span style="background:rgba(239,68,68,.1);color:#ef4444">♈ 양자리</span><span style="background:rgba(244,114,182,.1);color:var(--pink)">ENTP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"이직 고민 중에 해봤는데 <strong>직업운 분석이 놀라울 정도로 구체적.</strong> AI한테 '9월에 이직하면 어떨까' 추가 질문했더니 대운 흐름까지 설명해줌."</div><div class="rev-feat">💬 사용 기능: 사주 분석 + AI 추가 질문</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#60a5fa">윤</div><div><div class="rev-name">한윤서</div><div class="rev-meta">23세 여 · 대학생</div></div></div><div class="rev-badges"><span style="background:rgba(167,139,250,.1);color:var(--purple)">♊ 쌍둥이</span><span style="background:rgba(52,211,153,.1);color:var(--green)">ENFJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"사주 MBTI가 진짜 결과랑 <strong>똑같이 나와서</strong> 깜짝 놀랐어요. 오행으로 이렇게 맞출 수 있는 거였어? 친구 4명 다 해봤는데 3명 맞음."</div><div class="rev-feat">🧠 사용 기능: 사주 MBTI 추정</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#f472b6">하</div><div><div class="rev-name">오하린</div><div class="rev-meta">27세 여 · 디자이너</div></div></div><div class="rev-badges"><span style="background:rgba(59,130,246,.1);color:var(--blue)">♋ 게자리</span><span style="background:rgba(244,114,182,.1);color:var(--pink)">ISFP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"궁합 분석 돌려봤는데 <strong>우리 커플 문제점을 정확히 짚어줌.</strong> '화(火) 기운이 부딪힌다'는 해석에 남친이랑 진지하게 대화했어요. 궁합 높이는 법도 구체적."</div><div class="rev-feat">💫 사용 기능: 궁합 분석</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#eab308">성</div><div><div class="rev-name">강성민</div><div class="rev-meta">31세 남 · 자영업</div></div></div><div class="rev-badges"><span style="background:rgba(234,179,8,.1);color:var(--gold)">♉ 황소</span><span style="background:rgba(52,211,153,.1);color:var(--green)">ESTP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"매일 오늘의 운세 확인하는 게 루틴됨. <strong>행운의 색이랑 시간대별 운세</strong>가 의외로 맞아서 신기. 오후 2~4시에 계약 미팅 잡으라길래 했더니 진짜 성사됨."</div><div class="rev-feat">✨ 사용 기능: 오늘의 운세</div></div></div>
+    </div>
+    <div class="analysis-saju">
+      <div class="pillar"><div class="pillar-label">시</div><div class="pillar-char">丙</div><div class="pillar-char">午</div><div class="pillar-sub" style="color:var(--pink)">火 양</div></div>
+      <div class="pillar"><div class="pillar-label" style="color:var(--purple)">일 (나)</div><div class="pillar-char" style="color:var(--purple)">壬</div><div class="pillar-char">戌</div><div class="pillar-sub" style="color:var(--blue)">水 양</div></div>
+      <div class="pillar"><div class="pillar-label">월</div><div class="pillar-char">癸</div><div class="pillar-char">未</div><div class="pillar-sub" style="color:var(--blue)">水 음</div></div>
+      <div class="pillar"><div class="pillar-label">년</div><div class="pillar-char">乙</div><div class="pillar-char">亥</div><div class="pillar-sub" style="color:var(--green)">木 음</div></div>
+    </div>
+    <div class="oh-bar">
+      <div style="flex:2;background:var(--green)"></div>
+      <div style="flex:2;background:var(--pink)"></div>
+      <div style="flex:1;background:var(--gold)"></div>
+      <div style="flex:0;background:var(--purple)"></div>
+      <div style="flex:3;background:var(--blue)"></div>
+    </div>
+    <div class="analysis-body">
+      <h3>🔮 세 체계가 공통으로 말하는 본질</h3>
+      <div class="highlight">
+        <p>사주의 <strong style="color:#E0D4FF">임수(壬水) 일간</strong>, 서양 점성술의 <strong style="color:var(--gold)">♌ 사자자리</strong>, MBTI <strong style="color:var(--green)">ENFP</strong> — 세 체계 모두 <strong style="color:#fff">"풍부한 감성과 강한 리더십이 공존하는 인물"</strong>을 가리킵니다.</p>
+      </div>
+      <h3>⚖️ 오행 균형과 용신</h3>
+      <p>수(水) 기운이 3으로 가장 강하고 금(金)이 부족해요. <strong>용신은 금(金)</strong> — 쇠붙이 기운이 넘치는 물을 잡아주고 균형을 맞춰줘요. 흰색 계열 옷, 서쪽 방위가 도움이 됩니다.</p>
+      <h3>🌟 타고난 기질</h3>
+      <p>임수 일간은 큰 바다처럼 <strong>포용력이 넓고 지혜로운</strong> 사람이에요. 사자자리의 리더십과 만나면서, 겉으로는 카리스마 있게 이끌지만 내면은 깊은 감성을 가진 독특한 조합입니다.</p>
+      <h3>📅 2026년 병오(丙午)년 운세</h3>
+      <p>올해는 화(火) 기운이 강한 해. 임수 일간에게 화는 재물을 의미해요. <strong>새로운 수입원이나 부업 기회</strong>가 생길 가능성이 높습니다. 특히 여름(4~6월)에 기회가 집중될 수 있어요.</p>
+    </div>
+    <div class="blur-overlay">
+      <div class="blur-content">
+        <h3>💰 재물운 — 동서양 교차 분석</h3>
+        <p>사주의 편재와 사자자리의 창의적 에너지가 결합하여 2026년 하반기에 예상치 못한 재물 기회가...</p>
+        <h3>💕 연애운 — 동서양 교차 분석</h3>
+        <p>일지 술토의 화개살과 사자자리 특유의 로맨틱함이...</p>
+      </div>
+      <div class="blur-cta">
+        <p>재물운, 연애운, 직업운, 10년 대운...</p>
+        <a href="https://saju-ai-one.vercel.app">프리미엄으로 전체 보기 →</a>
+      </div>
     </div>
   </div>
-
-  <!-- Row 2: auto-scroll right (reverse) -->
-  <div class="review-track-wrap r d3" style="margin-top:16px">
-    <div class="review-track review-track-2" id="track2">
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#8b5cf6">태</div><div><div class="rev-name">윤태영</div><div class="rev-meta">26세 남 · 공무원 준비</div></div></div><div class="rev-badges"><span style="background:rgba(167,139,250,.1);color:var(--purple)">♎ 천칭</span><span style="background:rgba(96,165,250,.1);color:var(--blue)">INFJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"공시 준비 중인데 <strong>학업운에서 올해 가을이 고비</strong>라고 해서 마음 단단히 먹었어요. 타로도 같이 봤는데 '절제' 카드가 나왔는데 해석이 사주랑 연결돼서 소름."</div><div class="rev-feat">🎴 사용 기능: 타로 카드 + 학업운</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#ef4444">소</div><div><div class="rev-name">임소연</div><div class="rev-meta">33세 여 · 간호사</div></div></div><div class="rev-badges"><span style="background:rgba(239,68,68,.1);color:#ef4444">♐ 사수</span><span style="background:rgba(244,114,182,.1);color:var(--pink)">ESFJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"야간 근무 끝나고 심심해서 해봤는데 <strong>건강운에서 심장·혈관 주의</strong>라고 나온 거 보고 좀 놀랐어요. 화(火) 과다라서 그렇다는 설명이 논리적이었음."</div><div class="rev-feat">🏥 사용 기능: 건강운 상세 분석</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#3b82f6">재</div><div><div class="rev-name">서재원</div><div class="rev-meta">38세 남 · 사업가</div></div></div><div class="rev-badges"><span style="background:rgba(234,179,8,.1);color:var(--gold)">♌ 사자</span><span style="background:rgba(167,139,250,.1);color:var(--purple)">ENTJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"<strong>재물운 교차 분석이 가장 인상 깊었습니다.</strong> 사주에서 편재가 뜨는데 사자자리의 창의 에너지와 만나면 사업 확장 시기라는 해석. 실제로 2분기에 신사업 런칭 예정."</div><div class="rev-feat">💰 사용 기능: 통합 리포트 재물운</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#34d399">예</div><div><div class="rev-name">조예린</div><div class="rev-meta">22세 여 · 대학생</div></div></div><div class="rev-badges"><span style="background:rgba(59,130,246,.1);color:var(--blue)">♒ 물병</span><span style="background:rgba(52,211,153,.1);color:var(--green)">INTP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"점성술에서 물병자리 + 사주에서 수(水) 강한 조합이라 <strong>'혁신적이지만 감정 표현이 서툴다'</strong>고 나왔는데 너무 맞아서 캡처해서 친구한테 보냈어요 ㅋㅋ"</div><div class="rev-feat">⭐ 사용 기능: 점성술 분석</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#f59e0b">동</div><div><div class="rev-name">김동현</div><div class="rev-meta">30세 남 · 영업직</div></div></div><div class="rev-badges"><span style="background:rgba(239,68,68,.1);color:#ef4444">♈ 양자리</span><span style="background:rgba(52,211,153,.1);color:var(--green)">ESTP</span></div></div><div class="rev-body"><div class="rev-stars">★★★★☆</div><div class="rev-text">"사주에 상관(傷官)이 많다길래 뭔가 했더니 <strong>'말솜씨가 좋고 영업에 적합'</strong>이라는 해석. 맞긴 한데 좀 무섭기도 ㅎ 연애운도 구체적이라 여친한테 보여줌."</div><div class="rev-feat">💕 사용 기능: 연애운 + 적성 분석</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#a78bfa">나</div><div><div class="rev-name">이나영</div><div class="rev-meta">36세 여 · 프로덕트 매니저</div></div></div><div class="rev-badges"><span style="background:rgba(244,114,182,.1);color:var(--pink)">♍ 처녀</span><span style="background:rgba(96,165,250,.1);color:var(--blue)">ISTJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"남편이랑 궁합 봤는데 점수가 78점. <strong>'토(土)끼리 만나서 안정적이지만 변화가 부족'</strong>이라는 분석에 둘 다 공감. 궁합 높이는 법대로 여행 계획 잡았어요."</div><div class="rev-feat">💫 사용 기능: 궁합 + 통합 리포트</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#ec4899">찬</div><div><div class="rev-name">박찬영</div><div class="rev-meta">24세 남 · 군복무 중</div></div></div><div class="rev-badges"><span style="background:rgba(52,211,153,.1);color:var(--green)">♉ 황소</span><span style="background:rgba(167,139,250,.1);color:var(--purple)">ISFJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"군대에서 심심해서 해봤는데 <strong>전역 후 운세가 대박</strong>이라고 나옴 ㅋㅋㅋ 2027년에 화(火) 운이 들어오면서 새로운 시작에 좋다는 거. 전역 카운트다운 더 기대됨."</div><div class="rev-feat">📅 사용 기능: 2026~2027 연간 운세</div></div></div>
-
-      <div class="rev"><div class="rev-header"><div class="rev-user"><div class="rev-avatar" style="background:#60a5fa">미</div><div><div class="rev-name">장미래</div><div class="rev-meta">40세 여 · 요가 강사</div></div></div><div class="rev-badges"><span style="background:rgba(59,130,246,.1);color:var(--blue)">♋ 게자리</span><span style="background:rgba(244,114,182,.1);color:var(--pink)">ENFJ</span></div></div><div class="rev-body"><div class="rev-stars">★★★★★</div><div class="rev-text">"관상 분석에서 <strong>수(水)가 강해 귀가 크고 지적인 인상</strong>이라고 했는데 실제로 귀 큼 ㅋㅋ 사진 관상도 해봤는데 사주 기반이랑 거의 일치해서 신뢰감 올라감."</div><div class="rev-feat">👤 사용 기능: 사주 관상 + 사진 관상</div></div></div>
-    </div>
-  </div>
-
-  <div class="review-count r d4"><strong>2,400+</strong>명이 이미 경험했습니다</div>
 </section>
 
-<!-- COMPARISON -->
-<section class="comp-section">
-  <div class="container sec-center">
-    <p class="sec-label r">비교</p>
-    <h2 class="sec-title r d1">왜 여기서<br>봐야 할까.</h2>
+<!-- Features -->
+<section class="features reveal">
+  <h2 class="demo-title" style="margin-bottom:32px">다른 곳에 없는 기능</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🌌</div>
+      <div class="feature-title">동서양 통합 리포트</div>
+      <div class="feature-desc">사주 × 점성술 × MBTI를 AI가 교차검증. 세 체계가 합의하는 결론을 도출합니다.</div>
+      <span class="feature-tag" style="background:rgba(124,92,252,.1);color:var(--purple2)">킬러 기능</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⭐</div>
+      <div class="feature-title">서양 점성술</div>
+      <div class="feature-desc">태양 별자리 기반 2026년 행성 트랜짓 분석. 사주와 대조해서 정확도를 높여요.</div>
+      <span class="feature-tag" style="background:rgba(234,179,8,.1);color:var(--gold)">무료</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">사주 MBTI 추정</div>
+      <div class="feature-desc">오행 분포와 십성으로 MBTI 유형을 추정. 학술 연구 기반 매핑.</div>
+      <span class="feature-tag" style="background:rgba(52,211,153,.1);color:var(--green)">무료</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👤</div>
+      <div class="feature-title">AI 관상 분석</div>
+      <div class="feature-desc">사주 기반 외모 경향 추정(무료) + 실제 셀카 관상 분석(프리미엄).</div>
+      <span class="feature-tag" style="background:rgba(244,114,182,.1);color:var(--pink)">NEW</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔮</div>
+      <div class="feature-title">AI 사주 분석</div>
+      <div class="feature-desc">격국론, 용신론, 십성론 기반 깊이 있는 분석. 대화형으로 추가 질문도 가능.</div>
+      <span class="feature-tag" style="background:rgba(167,139,250,.1);color:var(--purple)">무료+프리미엄</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎴</div>
+      <div class="feature-title">타로 카드</div>
+      <div class="feature-desc">3카드 리딩을 사주와 연결해서 해석. 카드를 직접 뒤집는 인터랙티브 경험.</div>
+      <span class="feature-tag" style="background:rgba(251,191,36,.1);color:var(--gold)">무료</span>
+    </div>
   </div>
-  <div class="container"><table class="comp-table r d2">
-    <thead><tr><th></th><th>점신</th><th>포스텔러</th><th>사주GPT</th><th class="us-h">AI 사주명리</th></tr></thead>
+</section>
+
+<!-- Reviews -->
+<section class="reviews reveal">
+  <h2 class="demo-title" style="margin-bottom:32px">체험 후기</h2>
+  <div class="review-scroll">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"무료인데 <strong>분석이 진짜 길게 나와서</strong> 깜짝 놀랐어요. 다른 앱은 짧은 문장 한두 줄인데, 여기는 용신이 뭔지까지 설명해줌. 점성술이랑 MBTI까지 같이 보니까 <strong>아 나 진짜 이런 사람이구나</strong> 싶었어요."</div>
+      <div class="review-author">— 28세 여, 직장인</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"사주는 원래 관심 있었는데 <strong>별자리랑 MBTI를 교차검증</strong>한다는 게 신기해서 해봤어요. 통합 리포트에서 세 체계가 같은 방향을 가리키는 걸 보고 소름 돋았습니다."</div>
+      <div class="review-author">— 32세 남, 프리랜서</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"<strong>관상 분석</strong>이 생각보다 정확해서 친구들이랑 돌려봤어요. 사주 기반으로 나오는 거라 사진 안 올려도 되는 게 좋았고, 궁합도 재밌음."</div>
+      <div class="review-author">— 25세 여, 대학생</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★☆</div>
+      <div class="review-text">"무료에서 프리미엄 차이가 확실해요. 무료도 충분히 좋은데 통합 리포트 보면 <strong>990원이 아깝지 않음</strong>. 분기별 운세가 구체적이라 실제로 참고하게 됩니다."</div>
+      <div class="review-author">— 35세 남, 개발자</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"이직 고민 중에 해봤는데 <strong>직업운 분석이 놀라울 정도로 구체적</strong>이었어요. AI한테 추가 질문도 할 수 있어서 진짜 상담받는 느낌. 친구한테 바로 공유함."</div>
+      <div class="review-author">— 29세 여, 마케터</div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison -->
+<section class="comparison reveal">
+  <h2 class="demo-title" style="margin-bottom:32px">왜 여기서 봐야 할까?</h2>
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>점신</th>
+        <th>포스텔러</th>
+        <th>사주GPT</th>
+        <th class="us-header">AI 사주명리</th>
+      </tr>
+    </thead>
     <tbody>
       <tr><td>사주명리</td><td>✅</td><td>✅</td><td>✅</td><td class="us">✅</td></tr>
-      <tr><td>서양 점성술</td><td>—</td><td>일부</td><td>—</td><td class="us">✅</td></tr>
-      <tr><td>MBTI 연동</td><td>—</td><td>일부</td><td>—</td><td class="us">✅</td></tr>
-      <tr><td>동서양 통합</td><td>—</td><td>—</td><td>—</td><td class="us">✅ 유일</td></tr>
-      <tr><td>AI 관상</td><td>일부</td><td>—</td><td>—</td><td class="us">✅</td></tr>
-      <tr><td>AI 대화형</td><td>—</td><td>—</td><td>✅</td><td class="us">✅</td></tr>
-      <tr><td>타로</td><td>✅</td><td>✅</td><td>—</td><td class="us">✅</td></tr>
+      <tr><td>서양 점성술</td><td>❌</td><td>일부</td><td>❌</td><td class="us">✅</td></tr>
+      <tr><td>MBTI 연동</td><td>❌</td><td>일부</td><td>❌</td><td class="us">✅</td></tr>
+      <tr><td>동서양 통합 분석</td><td>❌</td><td>❌</td><td>❌</td><td class="us">✅ 유일</td></tr>
+      <tr><td>AI 관상</td><td>일부</td><td>❌</td><td>❌</td><td class="us">✅</td></tr>
+      <tr><td>AI 대화형 질문</td><td>❌</td><td>❌</td><td>✅</td><td class="us">✅</td></tr>
+      <tr><td>타로</td><td>✅</td><td>✅</td><td>❌</td><td class="us">✅</td></tr>
       <tr><td>가격</td><td>무료+광고</td><td>포인트제</td><td>무료</td><td class="us">무료 / ₩990</td></tr>
     </tbody>
-  </table></div>
+  </table>
 </section>
 
-<!-- FAQ -->
-<section class="faq-section">
-  <div class="container sec-center">
-    <p class="sec-label r">FAQ</p>
-    <h2 class="sec-title r d1">자주 묻는<br>질문들.</h2>
-  </div>
-  <div class="container">
-    <div class="faq-list">
-      <div class="faq-item r">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">진짜 AI가 분석하는 건가요?<span>+</span></button>
-        <div class="faq-a"><p>네, Claude AI가 사주 데이터를 기반으로 실시간 분석합니다. 사주 원국(년주·월주·일주·시주), 오행 분포, 십성 관계를 AI에게 전달하면, 격국론·용신론 등 전통 명리학 이론을 적용해 개인화된 분석을 생성합니다. 미리 작성된 템플릿이 아니라 매번 새로운 분석이 나옵니다.</p></div>
-      </div>
-      <div class="faq-item r d1">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">무료 분석과 프리미엄의 차이는?<span>+</span></button>
-        <div class="faq-a"><p>무료 분석은 사주 구성, 오행 균형, 용신, 성격, 적성, 2026년 운세, 행운 포인트까지 2,000자 이상 상세하게 제공됩니다. 프리미엄(₩990)은 여기에 재물운·연애운·직업운·건강운 상세 분석, 분기별 운세, 10년 대운, 동서양 통합 리포트, 사진 관상 분석, 무제한 추가 질문이 추가됩니다.</p></div>
-      </div>
-      <div class="faq-item r d2">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">동서양 통합 분석이 뭔가요?<span>+</span></button>
-        <div class="faq-a"><p>사주명리(동양), 서양 점성술, MBTI 성격 유형 — 이 세 가지 체계를 AI가 교차검증합니다. 예를 들어 사주에서 '리더십이 강하다'고 나오고, 별자리에서도 '사자자리의 카리스마', MBTI에서도 'ENTJ의 지휘관 성향'이 나오면 세 체계가 일치하는 것. 이런 교차 포인트를 찾아 핵심 성격과 운세를 도출합니다.</p></div>
-      </div>
-      <div class="faq-item r d3">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">사주 MBTI 추정은 정확한가요?<span>+</span></button>
-        <div class="faq-a"><p>학술 연구(이남호·김만태, 2018)를 기반으로 오행 분포와 십성 구성에서 MBTI 경향성을 추정합니다. 재미 목적의 참고용이며 정식 MBTI 검사를 대체하지는 않습니다. 다만 실제 체험자의 약 70% 이상이 "실제 MBTI와 일치하거나 유사하다"고 응답했습니다.</p></div>
-      </div>
-      <div class="faq-item r">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">개인정보는 안전한가요?<span>+</span></button>
-        <div class="faq-a"><p>회원가입이 필요 없고, 입력한 생년월일 데이터는 서버에 저장하지 않습니다. 분석은 실시간으로 이루어지며, 브라우저를 닫으면 데이터가 사라집니다. 사진 관상 분석의 경우에도 이미지는 분석 즉시 폐기됩니다.</p></div>
-      </div>
-      <div class="faq-item r d1">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">태어난 시간을 모르면?<span>+</span></button>
-        <div class="faq-a"><p>"모름"을 선택하면 시주(時柱)를 제외한 년주·월주·일주 3개 기둥으로 분석합니다. 정확도는 약간 낮아지지만 핵심 성향과 운세 흐름은 충분히 파악할 수 있어요. 사주의 가장 중요한 정보는 일간(일주 천간)이고, 이건 시간과 무관하게 정확합니다.</p></div>
-      </div>
-      <div class="faq-item r d2">
-        <button class="faq-q" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">사주 분석을 믿어야 하나요?<span>+</span></button>
-        <div class="faq-a"><p>사주는 "확정된 운명"이 아니라 타고난 기질과 흐름의 경향성을 보는 것입니다. 자기 이해와 의사결정의 참고 도구로 활용하시되, 중요한 결정은 반드시 전문가와 상담하시길 권합니다. 재미와 인사이트를 얻는 도구로 즐겨주세요.</p></div>
-      </div>
-    </div>
-  </div>
+<!-- Final CTA -->
+<section class="final-cta reveal">
+  <h2>지금 바로<br/>당신의 운명을 읽어보세요</h2>
+  <p>30초면 충분합니다. 회원가입도 필요 없어요.</p>
+  <a href="https://saju-ai-one.vercel.app" class="hero-cta">무료로 시작하기 →</a>
+  <p class="hero-free" style="margin-top:12px">기본 분석 무료 · 프리미엄 ₩990</p>
 </section>
 
-<!-- FINAL CTA -->
-<section class="final r">
-  <h2>당신의 운명을<br>읽어보세요.</h2>
-  <p>30초면 충분합니다.</p>
-  <a href="https://saju-ai-one.vercel.app" class="cta cta-purple">무료로 시작하기 →</a>
-  <p class="hero-note" style="margin-top:16px">기본 분석 무료 · 프리미엄 ₩990</p>
-</section>
-
-<footer><p>AI 사주명리 — 동서양 융합 운명 분석<br>사주 분석은 재미와 참고 목적이며, 중요한 의사결정은 전문가와 상담하세요.</p></footer>
+<!-- Footer -->
+<footer>
+  <p>AI 사주명리 v4 — 동서양 융합 운명 분석 플랫폼<br/>사주 분석은 재미와 참고 목적이며, 중요한 의사결정은 전문가와 상담하세요.</p>
+</footer>
 
 <script>
-// Scroll reveal
-const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('v');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
-document.querySelectorAll('.r').forEach(el=>io.observe(el));
+// Stars
+(function(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<40;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const size=Math.random()*1.5+0.3;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;opacity:${Math.random()*0.08+0.02};animation:tw ${Math.random()*4+2}s ease infinite`;
+    c.appendChild(s);
+  }
+})();
 
-// Duplicate review cards for infinite carousel
-['track1','track2'].forEach(id=>{
-  const track=document.getElementById(id);
-  if(track){track.innerHTML+=track.innerHTML}
-});
+// Twinkle
+const style=document.createElement('style');
+style.textContent='@keyframes tw{0%,100%{opacity:.02}50%{opacity:.15}}';
+document.head.appendChild(style);
+
+// Scroll reveal
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
+},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 </script>
 </body>
 </html>

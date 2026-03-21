@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NUVO AI — AI Products & Solutions Studio</title>
+<meta name="description" content="NUVO AI builds intelligent consumer products and delivers AI solutions for businesses. Fortune analysis, market briefings, enterprise AI — we bring ideas to life.">
+<meta property="og:title" content="NUVO AI — AI Products & Solutions Studio">
+<meta property="og:description" content="We build AI products people actually love to use.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#09090b;--card:#141418;--border:#1f1f26;--purple:#8b5cf6;--green:#10b981;--blue:#3b82f6;--amber:#f59e0b;--text:#f5f5f7;--sub:#8e8e93;--dim:#48484a}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--purple);text-decoration:none}
+.wrap{max-width:800px;margin:0 auto;padding:0 24px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.r{opacity:0;transform:translateY(20px);transition:all .5s ease}.r.v{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(9,9,11,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:14px 0}
+nav .wrap{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:15px;font-weight:700;letter-spacing:-.02em;color:#fff}
+.logo span{color:var(--purple)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-link{font-size:13px;color:var(--sub);cursor:pointer;transition:color .2s}
+.nav-link:hover{color:#fff}
+.lang-btn{font-size:11px;padding:5px 12px;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer}
+
+/* Sections */
+section{padding:60px 0}
+.sec-label{font-size:11px;letter-spacing:.1em;color:var(--purple);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+.sec-title{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1.2;margin-bottom:24px}
+@media(max-width:600px){.sec-title{font-size:26px}}
+
+/* Hero */
+.hero{padding:120px 0 60px;text-align:center}
+.hero h1{font-size:48px;font-weight:700;letter-spacing:-.04em;line-height:1.1;margin-bottom:16px}
+.hero h1 span{background:linear-gradient(135deg,var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:17px;color:var(--sub);line-height:1.6;max-width:500px;margin:0 auto 32px}
+.hero-cta{display:inline-block;padding:14px 36px;border-radius:50px;background:var(--purple);color:#fff;font-size:15px;font-weight:700;letter-spacing:-.02em;transition:all .3s}
+.hero-cta:hover{background:#7c3aed;transform:translateY(-2px)}
+@media(max-width:600px){.hero h1{font-size:32px}.hero{padding:100px 0 40px}}
+
+/* Services */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.svc-grid{grid-template-columns:1fr}}
+.svc{padding:24px 20px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:all .3s}
+.svc:hover{border-color:rgba(139,92,246,.3);transform:translateY(-2px)}
+.svc-icon{font-size:24px;margin-bottom:10px}
+.svc h3{font-size:15px;font-weight:700;color:#fff;margin-bottom:6px}
+.svc p{font-size:13px;color:var(--sub);line-height:1.6}
+
+/* Products */
+.prod-grid{display:flex;flex-direction:column;gap:12px}
+.prod{padding:24px 20px;border-radius:14px;background:var(--card);border:1px solid var(--border);display:flex;align-items:flex-start;gap:16px;transition:all .3s}
+.prod:hover{border-color:rgba(139,92,246,.3)}
+.prod-icon{font-size:28px;width:48px;height:48px;border-radius:12px;background:rgba(139,92,246,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.prod h3{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.prod p{font-size:12px;color:var(--sub);line-height:1.5}
+.badge-live{display:inline-block;padding:3px 10px;border-radius:50px;background:rgba(16,185,129,.12);color:var(--green);font-size:10px;font-weight:700;margin-left:8px}
+.badge-soon{display:inline-block;padding:3px 10px;border-radius:50px;background:rgba(245,158,11,.1);color:var(--amber);font-size:10px;font-weight:700;margin-left:8px}
+.prod-link{display:inline-block;margin-top:8px;font-size:12px;color:var(--purple);font-weight:600}
+
+/* Process */
+.process-grid{display:flex;flex-direction:column;gap:12px}
+.proc{display:flex;gap:14px;align-items:flex-start;padding:20px;border-radius:14px;background:var(--card);border:1px solid var(--border)}
+.proc-num{width:32px;height:32px;border-radius:8px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--purple);flex-shrink:0}
+.proc h3{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px}
+.proc p{font-size:12px;color:var(--sub);line-height:1.5}
+
+/* Team */
+.team-grid{display:flex;gap:12px}
+@media(max-width:500px){.team-grid{flex-direction:column}}
+.member{flex:1;padding:24px 20px;border-radius:14px;background:var(--card);border:1px solid var(--border);text-align:center}
+.member-avatar{width:56px;height:56px;border-radius:16px;background:rgba(139,92,246,.12);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px}
+.member h3{font-size:15px;font-weight:700;color:#fff}
+.member .role{font-size:12px;color:var(--purple);font-weight:600;margin:4px 0 8px}
+.member p{font-size:12px;color:var(--sub);line-height:1.5}
+
+/* Contact form */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
+.form-card{padding:24px;border-radius:14px;background:var(--card);border:1px solid var(--border)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:500}
+.form-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.form-input:focus{border-color:var(--purple)}
+textarea.form-input{min-height:100px;resize:vertical}
+select.form-input{appearance:none}
+.form-submit{width:100%;padding:12px;border-radius:10px;background:var(--purple);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all .3s}
+.form-submit:hover{background:#7c3aed}
+.form-success{display:none;text-align:center;padding:40px 20px}
+.form-success .check{width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
+.form-success h3{font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+.form-success p{font-size:13px;color:var(--sub)}
+
+footer{padding:24px;text-align:center;font-size:11px;color:var(--dim);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">NUVO <span>AI</span></div>
+    <div class="nav-right">
+      <span class="nav-link" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})" data-en="Services" data-kr="서비스">Services</span>
+      <span class="nav-link" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})" data-en="Products" data-kr="제품">Products</span>
+      <span class="nav-link" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" data-en="Contact" data-kr="문의">Contact</span>
+      <button class="lang-btn" onclick="toggleLang()">한국어</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <h1 class="r" data-en="We build AI that<br><span>works for people.</span>" data-kr="사람을 위한<br><span>AI를 만듭니다.</span>">We build AI that<br><span>works for people.</span></h1>
+    <p class="r d1" data-en="NUVO AI is a Seoul-based studio building intelligent consumer products and delivering AI solutions for businesses." data-kr="NUVO AI는 서울 기반 AI 스튜디오입니다. 소비자 AI 제품을 만들고, 기업에 AI 솔루션을 제공합니다.">NUVO AI is a Seoul-based studio building intelligent consumer products and delivering AI solutions for businesses.</p>
+    <a href="#contact" class="hero-cta r d2" data-en="Start a Project →" data-kr="프로젝트 시작하기 →">Start a Project →</a>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="wrap">
+    <p class="sec-label r" data-en="Services" data-kr="서비스">Services</p>
+    <h2 class="sec-title r d1" data-en="What we can<br>build for you." data-kr="무엇을 만들어<br>드릴까요.">What we can<br>build for you.</h2>
+    <div class="svc-grid">
+      <div class="svc r d1"><div class="svc-icon">🛠</div><h3 data-en="AI Web App Development" data-kr="AI 웹앱 개발">AI Web App Development</h3><p data-en="Custom AI-powered web applications. From concept to deployment." data-kr="맞춤형 AI 웹 애플리케이션. 기획부터 배포까지.">Custom AI-powered web applications. From concept to deployment.</p></div>
+      <div class="svc r d2"><div class="svc-icon">🧭</div><h3 data-en="AI Consulting & Strategy" data-kr="AI 컨설팅 & 전략">AI Consulting & Strategy</h3><p data-en="AI adoption roadmap, feasibility analysis, and strategic advisory." data-kr="AI 도입 로드맵, 타당성 분석, 전략 자문.">AI adoption roadmap, feasibility analysis, and strategic advisory.</p></div>
+      <div class="svc r d3"><div class="svc-icon">⚡</div><h3 data-en="AI Automation" data-kr="AI 자동화 구축">AI Automation</h3><p data-en="Workflow automation with n8n, AI pipelines, and integration." data-kr="n8n 워크플로우, AI 파이프라인, 시스템 연동.">Workflow automation with n8n, AI pipelines, and integration.</p></div>
+      <div class="svc r d4"><div class="svc-icon">🏢</div><h3 data-en="Enterprise AI Adoption" data-kr="기업 AI 도입 자문">Enterprise AI Adoption</h3><p data-en="Help organizations integrate AI into existing operations." data-kr="기존 업무에 AI를 통합하는 것을 지원합니다.">Help organizations integrate AI into existing operations.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="wrap">
+    <p class="sec-label r" data-en="Products" data-kr="자체 제품">Products</p>
+    <h2 class="sec-title r d1" data-en="Products we've<br>shipped." data-kr="우리가 만든<br>제품들.">Products we've<br>shipped.</h2>
+    <div class="prod-grid">
+      <div class="prod r d1">
+        <div class="prod-icon">🔮</div>
+        <div>
+          <h3 data-en="NUVO AI Platform" data-kr="NUVO AI 통합 플랫폼">NUVO AI Platform</h3><span class="badge-live" data-en="Live" data-kr="운영중">Live</span>
+          <p data-en="Saju fortune + Western astrology + MBTI cross-analysis. AI market briefing, Fortune Signal (oheng × ETF), Lucky Calendar, AI coaches — all in one app." data-kr="사주명리 + 서양 점성술 + MBTI 교차분석. AI 시장 브리핑, Fortune Signal (오행 × ETF), Lucky Calendar, AI 코치 — 하나의 앱에서.">Saju fortune + Western astrology + MBTI cross-analysis. AI market briefing, Fortune Signal, Lucky Calendar, AI coaches — all in one app.</p>
+          <a href="https://saju-ai-one.vercel.app" class="prod-link" data-en="Try it free →" data-kr="무료로 시작하기 →">Try it free →</a>
+        </div>
+      </div>
+      <div class="prod r d2">
+        <div class="prod-icon">📡</div>
+        <div>
+          <h3 data-en="AI Daily Briefing" data-kr="AI 데일리 브리핑">AI Daily Briefing</h3><span class="badge-live" data-en="Live" data-kr="운영중">Live</span>
+          <p data-en="Real-time news collection → AI analysis → Chain reaction prediction. Stocks, real estate, forex, crypto, macro. EN/KR bilingual." data-kr="실시간 뉴스 수집 → AI 분석 → 연쇄영향 예측. 주식, 부동산, 환율, 암호화폐, 거시경제. EN/KR 이중언어.">Real-time news collection → AI analysis → Chain reaction prediction. EN/KR bilingual.</p>
+          <a href="https://saju-ai-one.vercel.app" class="prod-link" data-en="Try it free →" data-kr="무료로 시작하기 →">Try it free →</a>
+        </div>
+      </div>
+      <div class="prod r d3">
+        <div class="prod-icon" style="background:rgba(245,158,11,.08)">💕</div>
+        <div>
+          <h3 data-en="AI Love Coach" data-kr="AI 연애 코치">AI Love Coach</h3><span class="badge-soon" data-en="Coming Soon" data-kr="출시 예정">Coming Soon</span>
+          <p data-en="Saju-based relationship coaching with personalized conversation tactics and timing advice." data-kr="사주 기반 연애 코칭. 대화 전략, 타이밍 조언.">Saju-based relationship coaching.</p>
+        </div>
+      </div>
+      <div class="prod r d4">
+        <div class="prod-icon" style="background:rgba(245,158,11,.08)">✏️</div>
+        <div>
+          <h3 data-en="AI Naming" data-kr="AI 이름 짓기">AI Naming</h3><span class="badge-soon" data-en="Coming Soon" data-kr="출시 예정">Coming Soon</span>
+          <p data-en="Baby names, brand names, company names — analyzed by linguistics, numerology, and cultural fit." data-kr="아기 이름, 브랜드명, 회사명 — 언어학, 작명학, 문화적 적합성 AI 분석.">Baby names, brand names, company names — analyzed by AI.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section>
+  <div class="wrap">
+    <p class="sec-label r" data-en="Process" data-kr="프로세스">Process</p>
+    <h2 class="sec-title r d1" data-en="How we work." data-kr="우리의 일하는 방식.">How we work.</h2>
+    <div class="process-grid">
+      <div class="proc r d1"><div class="proc-num">1</div><div><h3 data-en="Inquiry" data-kr="문의">Inquiry</h3><p data-en="Tell us about your idea, problem, or what you'd like to build." data-kr="아이디어, 문제, 만들고 싶은 것을 알려주세요.">Tell us about your idea or problem.</p></div></div>
+      <div class="proc r d2"><div class="proc-num">2</div><div><h3 data-en="Review & Proposal" data-kr="검토 & 제안">Review & Proposal</h3><p data-en="We review within 48 hours and provide a scope, timeline, and estimate." data-kr="48시간 내 검토 후 범위, 일정, 견적을 제안합니다.">We review within 48h and provide a proposal.</p></div></div>
+      <div class="proc r d3"><div class="proc-num">3</div><div><h3 data-en="Build & Iterate" data-kr="개발 & 반복">Build & Iterate</h3><p data-en="Agile sprints with weekly demos. You see progress every week." data-kr="주간 데모와 함께 애자일 스프린트. 매주 진행 상황을 확인합니다.">Agile sprints with weekly demos.</p></div></div>
+      <div class="proc r d4"><div class="proc-num">4</div><div><h3 data-en="Launch & Support" data-kr="런칭 & 지원">Launch & Support</h3><p data-en="Deployment, monitoring, and ongoing support included." data-kr="배포, 모니터링, 지속적 지원 포함.">Deployment, monitoring, and support included.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section>
+  <div class="wrap">
+    <p class="sec-label r" data-en="Team" data-kr="팀">Team</p>
+    <h2 class="sec-title r d1" data-en="The people<br>behind NUVO." data-kr="NUVO를 만드는<br>사람들.">The people<br>behind NUVO.</h2>
+    <div class="team-grid">
+      <div class="member r d1">
+        <div class="member-avatar">JH</div>
+        <h3>Jihwan Hwang</h3>
+        <div class="role">CEO & Product</div>
+        <p data-en="Ex-SAP/Healthcare consultant. AI product strategy, business development, and go-to-market." data-kr="전 SAP/헬스케어 컨설턴트. AI 제품 전략, 사업 개발, GTM.">Ex-SAP/Healthcare consultant. Product strategy & GTM.</p>
+      </div>
+      <div class="member r d2">
+        <div class="member-avatar">CA</div>
+        <h3>Changmin Ahn</h3>
+        <div class="role">CTO & Engineering</div>
+        <p data-en="Full-stack engineer. AI/ML systems, infrastructure, and platform architecture." data-kr="풀스택 엔지니어. AI/ML 시스템, 인프라, 플랫폼 아키텍처.">Full-stack engineer. AI/ML systems & architecture.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <p class="sec-label r" data-en="Contact" data-kr="문의">Contact</p>
+    <h2 class="sec-title r d1" data-en="Let's build<br>something great." data-kr="함께 만들어<br>봅시다.">Let's build<br>something great.</h2>
+    <div class="contact-grid">
+      <div class="r d2">
+        <p style="font-size:14px;color:var(--sub);line-height:1.7" data-en="Whether you have a detailed spec or just a rough idea — we'd love to hear from you. We'll get back within <strong style='color:#fff'>48 hours</strong>." data-kr="상세한 기획서가 있든, 대략적인 아이디어만 있든 — 무엇이든 말씀해주세요. <strong style='color:#fff'>48시간 내</strong> 회신드립니다.">Whether you have a detailed spec or just a rough idea — we'd love to hear from you.</p>
+        <p style="margin-top:16px;font-size:14px;color:var(--sub)" data-en="Or reach us directly:" data-kr="직접 연락:">Or reach us directly:</p>
+        <p style="margin-top:8px;font-size:14px">📧 <a href="mailto:hello@nuvoai.com">hello@nuvoai.com</a></p>
+        <p style="margin-top:20px;font-size:12px;color:var(--dim)" data-en="Based in Seoul, serving clients globally." data-kr="서울 기반, 글로벌 고객 대상.">Based in Seoul, serving clients globally.</p>
+      </div>
+      <div class="r d3">
+        <div class="form-card" id="formCard">
+          <div id="formFields">
+            <div class="form-group"><label data-en="Name" data-kr="이름">Name</label><input class="form-input" type="text" id="f-name" placeholder="John Doe" data-en-ph="John Doe" data-kr-ph="홍길동"></div>
+            <div class="form-group"><label data-en="Email" data-kr="이메일">Email</label><input class="form-input" type="email" id="f-email" placeholder="john@company.com"></div>
+            <div class="form-group"><label data-en="Service Type" data-kr="서비스 유형">Service Type</label><select class="form-input" id="f-type"><option value="" data-en="Select a service" data-kr="서비스를 선택하세요">Select a service</option><option value="webapp" data-en="AI Web App Development" data-kr="AI 웹앱 개발">AI Web App Development</option><option value="consulting" data-en="AI Consulting & Strategy" data-kr="AI 컨설팅 & 전략">AI Consulting & Strategy</option><option value="automation" data-en="AI Automation" data-kr="AI 자동화 구축">AI Automation</option><option value="enterprise" data-en="Enterprise AI Adoption" data-kr="기업 AI 도입 자문">Enterprise AI Adoption</option><option value="other" data-en="Other" data-kr="기타">Other</option></select></div>
+            <div class="form-group"><label data-en="Tell us about your project" data-kr="프로젝트에 대해 알려주세요">Tell us about your project</label><textarea class="form-input" id="f-msg" placeholder="Describe your idea..." data-en-ph="Describe your idea, problem, or what you'd like to build..." data-kr-ph="아이디어, 문제, 만들고 싶은 것을 설명해주세요..."></textarea></div>
+            <button class="form-submit" onclick="submitForm()" data-en="Send Inquiry" data-kr="문의 보내기">Send Inquiry</button>
+          </div>
+          <div class="form-success" id="formSuccess">
+            <div class="check">✓</div>
+            <h3 data-en="Message sent!" data-kr="문의가 전송되었습니다!">Message sent!</h3>
+            <p data-en="We'll review your inquiry and get back within 48 hours." data-kr="의뢰를 검토하고 48시간 내에 회신드립니다.">We'll get back within 48 hours.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer><p>© 2026 NUVO AI · Seoul, South Korea · <a href="mailto:hello@nuvoai.com">hello@nuvoai.com</a></p></footer>
+
+<script>
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('v');io.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.r').forEach(el=>io.observe(el));
+
+let lang='en';
+function toggleLang(){
+  lang=lang==='en'?'kr':'en';
+  document.querySelector('.lang-btn').textContent=lang==='en'?'한국어':'English';
+  document.documentElement.lang=lang==='en'?'en':'ko';
+  document.querySelectorAll('[data-en]').forEach(el=>{const v=el.getAttribute(`data-${lang}`);if(v)el.innerHTML=v});
+  document.querySelectorAll('[data-en-ph]').forEach(el=>{const v=el.getAttribute(`data-${lang}-ph`);if(v)el.placeholder=v});
+  document.querySelectorAll('select option[data-en]').forEach(el=>{const v=el.getAttribute(`data-${lang}`);if(v)el.textContent=v});
+}
+
+function submitForm(){
+  const name=document.getElementById('f-name').value;
+  const email=document.getElementById('f-email').value;
+  const type=document.getElementById('f-type').value;
+  const msg=document.getElementById('f-msg').value;
+  if(!name||!email||!msg){alert(lang==='en'?'Please fill in all fields.':'모든 항목을 입력해주세요.');return}
+  const subject=encodeURIComponent(`[NUVO AI Inquiry] ${type} - ${name}`);
+  const body=encodeURIComponent(`Name: ${name}\nEmail: ${email}\nService: ${type}\n\nMessage:\n${msg}`);
+  window.open(`mailto:hello@nuvoai.com?subject=${subject}&body=${body}`);
+  document.getElementById('formFields').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+}
+</script>
+</body>
+</html>

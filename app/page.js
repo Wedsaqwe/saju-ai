@@ -331,6 +331,7 @@ export default function NuvoApp(){
   const[tgChatId,setTgChatId]=useState("");
   const[tgSaved,setTgSaved]=useState(false);
   const[tgEnabled,setTgEnabled]=useState(false);
+  const tgRef=useRef(null);
 
   /* ═══ MY TAB STATE ═══ */
   const[appLang,setAppLang]=useState("kr");
@@ -461,9 +462,11 @@ export default function NuvoApp(){
 
   /* ═══ TELEGRAM FUNCTIONS ═══ */
   function saveTelegram(){
-    if(!tgChatId.trim())return;
+    const val=tgRef.current?.value||tgChatId;
+    if(!val.trim())return;
     try{
-      localStorage.setItem("nuvo_tg_chatid",tgChatId.trim());
+      setTgChatId(val.trim());
+      localStorage.setItem("nuvo_tg_chatid",val.trim());
       setTgSaved(true);setTgEnabled(true);
     }catch(e){}
   }
@@ -474,9 +477,10 @@ export default function NuvoApp(){
     }catch(e){}
   }
   async function sendTelegramTest(){
-    if(!tgChatId.trim())return;
+    const val=tgRef.current?.value||tgChatId;
+    if(!val.trim())return;
     try{
-      await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId:tgChatId.trim(),message:"✅ NUVO AI 알림 연결 테스트 성공!\n매일 아침 시장 브리핑을 받아보세요."})});
+      await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chatId:val.trim(),message:"✅ NUVO AI 알림 연결 테스트 성공!\n매일 아침 시장 브리핑을 받아보세요."})});
     }catch(e){}
   }
 
@@ -623,7 +627,14 @@ export default function NuvoApp(){
   function goHome(){setMainTab("home");setPg("home")}
   function goFortune(){setMainTab("fortune");setPg("fortuneHub")}
   function goFortuneSub(sub){setMainTab("fortune");setPg(sub)}
-  function goBriefing(){setMainTab("briefing");setPg("briefingHub");setBriefSub("daily");if(!briefData&&!briefLoading)setTimeout(loadBriefing,300)}
+  function goBriefing(){setMainTab("briefing");setPg("briefingHub");setBriefSub("daily")}
+
+  // 브리핑 탭 진입 시 자동 로드
+  useEffect(()=>{
+    if(pg==="briefingHub"&&briefSub==="daily"&&!briefData&&!briefLoading){
+      loadBriefing();
+    }
+  },[pg,briefSub]);
   function goMy(){setMainTab("my");setPg("myPage")}
   function resetAll(){setPg("home");setMainTab("home");setRd("");setCh([]);setSaju2(null);setTab("result")}
 
@@ -1563,7 +1574,7 @@ export default function NuvoApp(){
               <p style={{fontSize:12,color:T.sub,lineHeight:1.6,margin:0}}>1. Telegram에서 <strong style={{color:T.text}}>@NuvoAI_bot</strong> 검색 후 /start<br/>2. 받은 Chat ID를 아래에 입력</p>
             </div>
             <div style={{display:"flex",gap:6}}>
-              <input value={tgChatId} onChange={e=>setTgChatId(e.target.value)} placeholder="Chat ID 입력" style={{...INP,flex:1,fontSize:13}}/>
+              <input ref={tgRef} defaultValue={tgChatId} placeholder="Chat ID 입력" style={{...INP,flex:1,fontSize:13}}/>
               <Btn primary onClick={()=>{saveTelegram();sendTelegramTest()}} style={{padding:"10px 18px",fontSize:12,whiteSpace:"nowrap"}}>연결</Btn>
             </div>
           </div>:<div>

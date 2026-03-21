@@ -91,11 +91,11 @@ export async function POST(req) {
   try {
     const { lang = "kr", category = "all" } = await req.json();
 
-    // 1. RSS 수집
+    // 1. RSS 수집 (Vercel Hobby 10초 제한 — 최대 3소스)
     const sources = RSS_SOURCES[lang] || RSS_SOURCES.kr;
     const filteredSources = category === "all"
-      ? sources
-      : sources.filter((s) => s.cat === "all" || s.cat === category);
+      ? sources.slice(0, 3)
+      : sources.filter((s) => s.cat === "all" || s.cat === category).slice(0, 3);
 
     const allArticles = [];
     await Promise.all(
@@ -105,14 +105,14 @@ export async function POST(req) {
       })
     );
 
-    // 중복 제거 + 최신순 정렬
+    // 중복 제거
     const seen = new Set();
     const unique = allArticles.filter((a) => {
       const key = a.title.slice(0, 30);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    }).slice(0, 20);
+    }).slice(0, 12);
 
     if (unique.length === 0) {
       return Response.json({ error: "뉴스를 수집할 수 없습니다. 잠시 후 다시 시도해주세요." });
@@ -122,7 +122,7 @@ export async function POST(req) {
     const prompt = buildBriefingPrompt(unique, lang, category);
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 3000,
+      max_tokens: 2000,
       messages: [{ role: "user", content: prompt }],
     });
 

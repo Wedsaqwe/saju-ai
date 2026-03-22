@@ -673,7 +673,7 @@ export default function NuvoApp(){
   const page={...wrap,paddingTop:24,paddingBottom:100,animation:"fadeIn .4s ease"};
 
   return (
-    <div style={{fontFamily:"'SUIT Variable','SUIT',-apple-system,BlinkMacSystemFont,sans-serif",background:T.bg,minHeight:"100vh",color:T.text,position:"relative",overflow:"hidden",paddingBottom:72,letterSpacing:"-0.02em"}}>
+    <div style={{fontFamily:"'SUIT Variable','SUIT',-apple-system,BlinkMacSystemFont,sans-serif",background:T.bg,minHeight:"100vh",color:T.text,position:"relative",overflow:"hidden",paddingBottom:72,letterSpacing:"-0.02em",maxWidth:480,width:"100%",margin:"0 auto",boxShadow:"0 0 80px rgba(139,92,246,0.05)"}}>
       <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet"/>
       <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
       <style>{`
@@ -687,6 +687,9 @@ export default function NuvoApp(){
         select{appearance:none}
         button{transition:all .2s;font-family:'SUIT Variable','SUIT',-apple-system,sans-serif}
         *::-webkit-scrollbar{display:none}
+        @media(min-width:481px){
+          body{display:flex;justify-content:center;background:#050510}
+        }
       `}</style>
 
       {/* ═══ AMBIENT ORBS ═══ */}
@@ -750,12 +753,12 @@ export default function NuvoApp(){
           {/* 기능 쇼케이스 — 가로 스와이프 */}
           <div style={{marginTop:36,overflowX:"auto",display:"flex",gap:10,paddingBottom:8,scrollbarWidth:"none",msOverflowStyle:"none",WebkitOverflowScrolling:"touch"}}>
             {[
-              {emoji:"🔮",title:"사주명리",desc:"만세력 기반 AI 분석\n2000자+ 상세 풀이",bg:"rgba(139,92,246,0.1)",bc:"rgba(139,92,246,0.2)"},
-              {emoji:"📡",title:"AI 브리핑",desc:"실시간 뉴스 수집\n연쇄영향 4단계 예측",bg:"rgba(59,130,246,0.1)",bc:"rgba(59,130,246,0.2)"},
-              {emoji:"📈",title:"Fortune Signal",desc:"오행 × 시장 데이터\n맞춤 ETF 시그널",bg:"rgba(16,185,129,0.1)",bc:"rgba(16,185,129,0.2)"},
-              {emoji:"💕",title:"AI 코치",desc:"연애·커리어·건강\n사주 기반 맞춤 상담",bg:"rgba(244,114,182,0.1)",bc:"rgba(244,114,182,0.2)"},
-              {emoji:"📅",title:"Lucky Calendar",desc:"일진 기반 투자 등급\nA+~D 월간 캘린더",bg:"rgba(245,158,11,0.1)",bc:"rgba(245,158,11,0.2)"},
-            ].map((f,i)=><div key={i} style={{minWidth:160,padding:"20px 16px",borderRadius:16,background:f.bg,border:`1px solid ${f.bc}`,textAlign:"left",flexShrink:0}}>
+              {emoji:"🔮",title:"사주명리",desc:"만세력 기반 AI 분석\n2000자+ 상세 풀이",bg:"rgba(139,92,246,0.1)",bc:"rgba(139,92,246,0.2)",fn:()=>goFortuneSub("input")},
+              {emoji:"📡",title:"AI 브리핑",desc:"실시간 뉴스 수집\n연쇄영향 4단계 예측",bg:"rgba(59,130,246,0.1)",bc:"rgba(59,130,246,0.2)",fn:()=>goBriefing()},
+              {emoji:"📈",title:"Fortune Signal",desc:"오행 × 시장 데이터\n맞춤 ETF 시그널",bg:"rgba(16,185,129,0.1)",bc:"rgba(16,185,129,0.2)",fn:()=>goFortuneSub("input")},
+              {emoji:"💕",title:"AI 코치",desc:"연애·커리어·건강\n사주 기반 맞춤 상담",bg:"rgba(244,114,182,0.1)",bc:"rgba(244,114,182,0.2)",fn:()=>goCoach()},
+              {emoji:"📅",title:"Lucky Calendar",desc:"일진 기반 투자 등급\nA+~D 월간 캘린더",bg:"rgba(245,158,11,0.1)",bc:"rgba(245,158,11,0.2)",fn:()=>goFortuneSub("input")},
+            ].map((f,i)=><div key={i} onClick={f.fn} style={{minWidth:160,padding:"20px 16px",borderRadius:16,background:f.bg,border:`1px solid ${f.bc}`,textAlign:"left",flexShrink:0,cursor:"pointer",transition:"all .2s"}}>
               <div style={{fontSize:28,marginBottom:10}}>{f.emoji}</div>
               <div style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:6}}>{f.title}</div>
               <div style={{fontSize:11,color:T.sub,lineHeight:1.5,whiteSpace:"pre-line"}}>{f.desc}</div>

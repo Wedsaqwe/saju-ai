@@ -444,19 +444,9 @@ export default function NuvoApp(){
         price:c.quotes?.USD?.price?.toFixed(c.quotes?.USD?.price>100?0:2)||"—",
         change:c.quotes?.USD?.percent_change_24h?.toFixed(1)||"0",
       }));
-      // 고정 항목 추가 (실시간 아님, 참고용)
-      const staticTickers=[
-        {name:"KOSPI",price:"2,610",change:"+0.3",isStatic:true},
-        {name:"USD/KRW",price:"1,382",change:"-0.1",isStatic:true},
-      ];
-      setTickers([...staticTickers,...mapped]);
+      setTickers(mapped);
     }catch(e){
-      setTickers([
-        {name:"KOSPI",price:"2,610",change:"+0.3",isStatic:true},
-        {name:"USD/KRW",price:"1,382",change:"-0.1",isStatic:true},
-        {name:"BTC",price:"—",change:"0",isStatic:true},
-        {name:"ETH",price:"—",change:"0",isStatic:true},
-      ]);
+      setTickers([]);
     }finally{setTickerLoading(false)}
   }
 
@@ -1281,7 +1271,7 @@ export default function NuvoApp(){
                 <span style={{fontSize:11,fontWeight:700,color:T.sub,fontFamily:"'JetBrains Mono','Geist',monospace"}}>{t.name}</span>
                 <span style={{fontSize:12,fontWeight:600,color:"#fff",fontFamily:"'JetBrains Mono',monospace"}}>{typeof t.price==="number"?t.price.toLocaleString():t.price}</span>
                 <span style={{fontSize:10,fontWeight:700,color:up?T.green:down?T.red:T.dim,fontFamily:"'JetBrains Mono',monospace"}}>{up?"+":""}{t.change}%</span>
-                {t.isStatic&&<span style={{fontSize:7,color:T.dim}}>*</span>}
+                
                 {i<tickers.length-1&&<span style={{color:T.border,fontSize:10}}>│</span>}
               </div>;
             })}

@@ -57,9 +57,12 @@ const GRADE_MSG = {
 };
 
 export async function GET(req) {
-  // Vercel Cron 인증 (선택적)
+  // 인증: Vercel Cron 헤더 OR 쿼리 파라미터
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
+  const url = new URL(req.url);
+  const querySecret = url.searchParams.get("secret");
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}` && querySecret !== cronSecret) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 

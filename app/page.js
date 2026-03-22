@@ -664,11 +664,12 @@ export default function NuvoApp(){
       loadBriefing();
     }
   },[pg,briefSub]);
+  function goCoach(){setMainTab("coach");setPg("coachHub")}
   function goMy(){setMainTab("my");setPg("myPage")}
   function resetAll(){setPg("home");setMainTab("home");setRd("");setCh([]);setSaju2(null);setTab("result")}
 
   /* ═══ RENDER ═══ */
-  const wrap={maxWidth:480,margin:"0 auto",padding:"0 20px",position:"relative",zIndex:1};
+  const wrap={maxWidth:480,margin:"0 auto",padding:"0 20px",position:"relative",zIndex:1,width:"100%"};
   const page={...wrap,paddingTop:24,paddingBottom:100,animation:"fadeIn .4s ease"};
 
   return (
@@ -874,19 +875,7 @@ export default function NuvoApp(){
             </div>)}
           </div>
 
-          {/* AI 코치 3열 */}
-          <div style={{fontSize:12,color:T.dim,fontWeight:600,marginBottom:8,paddingLeft:4}}>AI 코치</div>
-          <div style={{display:"flex",gap:8,marginBottom:8}}>
-            {[
-              {emoji:"💕",label:"연애",c:T.pink,fn:()=>{if(hasBundleSub)startCoach("relationship");else setPw(true)}},
-              {emoji:"💼",label:"커리어",c:T.blue,fn:()=>{if(hasBundleSub)startCoach("career");else setPw(true)}},
-              {emoji:"🏥",label:"웰니스",c:T.green,fn:()=>{if(hasBundleSub)doWellness();else setPw(true)}},
-            ].map((item,i)=><div key={i} onClick={item.fn} style={{flex:1,cursor:"pointer",padding:"16px 8px",borderRadius:14,background:`${item.c}06`,border:`1px solid ${item.c}12`,textAlign:"center"}}>
-              <div style={{fontSize:22,marginBottom:4}}>{item.emoji}</div>
-              <div style={{fontSize:11,fontWeight:700,color:item.c}}>{item.label}</div>
-              <span style={{display:"inline-block",marginTop:4,padding:"2px 7px",borderRadius:50,background:`${item.c}12`,color:item.c,fontSize:8,fontWeight:700}}>BUNDLE</span>
-            </div>)}
-          </div>
+
         </div>}
       </div>}
 
@@ -920,25 +909,7 @@ export default function NuvoApp(){
             <span style={{color:T.dim,fontSize:14}}>→</span>
           </Card>)}
 
-          {/* AI 코치 */}
-          <div style={{marginTop:12}}>
-            <div style={{fontSize:13,color:T.dim,fontWeight:600,marginBottom:8,paddingLeft:4}}>AI 코치</div>
-            {[
-              {emoji:"💕",title:"AI 연애 코치",desc:"사주 기반 연애 상담",badge:"BUNDLE",bc:T.pink,fn:()=>{if(hasSaju){if(hasBundleSub)startCoach("relationship");else setPw(true)}else goFortuneSub("input")}},
-              {emoji:"💼",title:"커리어 타이밍 코치",desc:"이직·승진 타이밍",badge:"BUNDLE",bc:T.blue,fn:()=>{if(hasSaju){if(hasBundleSub)startCoach("career");else setPw(true)}else goFortuneSub("input")}},
-              {emoji:"🏥",title:"웰니스 가이드",desc:"오행 체질 건강 가이드",badge:"BUNDLE",bc:T.green,fn:()=>{if(hasSaju){if(hasBundleSub)doWellness();else setPw(true)}else goFortuneSub("input")}},
-            ].map((item,i)=><Card key={i} style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:"16px 18px",marginBottom:8}} onClick={item.fn}>
-              <div style={{width:40,height:40,borderRadius:12,background:`${item.bc}12`,border:`1px solid ${item.bc}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{item.emoji}</div>
-              <div style={{flex:1}}>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{fontSize:15,fontWeight:700,color:"#fff"}}>{item.title}</span>
-                  <span style={{padding:"2px 8px",borderRadius:50,background:`${item.bc}15`,color:item.bc,fontSize:9,fontWeight:700}}>{item.badge}</span>
-                </div>
-                <div style={{fontSize:12,color:T.dim,marginTop:1}}>{item.desc}</div>
-              </div>
-              <span style={{color:T.dim,fontSize:14}}>→</span>
-            </Card>)}
-          </div>
+
         </div>
       </div>}
 
@@ -1537,7 +1508,40 @@ export default function NuvoApp(){
       </div>}
 
       {/* ═══════════════════════════════════════
-           TAB 4: 👤 MY
+           TAB 4: 💬 COACH
+         ═══════════════════════════════════════ */}
+      {pg==="coachHub"&&<div style={page}>
+        <PageTitle emoji="💬" title="AI 코치" sub="사주 기반 맞춤 상담"/>
+        {!hasSaju&&<Card style={{textAlign:"center",padding:30}}>
+          <div style={{fontSize:28,marginBottom:10}}>💬</div>
+          <p style={{fontSize:14,color:T.sub,marginBottom:16}}>사주 분석을 먼저 진행해주세요</p>
+          <Btn primary onClick={()=>goFortuneSub("input")}>사주 입력하기</Btn>
+        </Card>}
+        {hasSaju&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {[
+            {emoji:"💕",title:"AI 연애 코치",desc:"사주 궁합 기반 연애 상담. 데이트 타이밍, 고백법, 화해법까지.",badge:"BUNDLE",bc:T.pink,type:"relationship",quickQ:["오늘 데이트 어때?","고백 타이밍","다툼 후 화해법","상대 마음 읽기"]},
+            {emoji:"💼",title:"커리어 타이밍 코치",desc:"사주 관운(官運) 기반 이직·승진·사업 타이밍 코칭.",badge:"BUNDLE",bc:T.blue,type:"career",quickQ:["이직 타이밍","연봉 협상 시기","사업 시작 시점","승진 가능성"]},
+            {emoji:"🏥",title:"웰니스 가이드",desc:"오행 체질 기반 식단·운동·수면 가이드.",badge:"BUNDLE",bc:T.green,type:"wellness"},
+          ].map((item,i)=><Card key={i} style={{cursor:"pointer",padding:20,border:`1px solid ${item.bc}15`,background:`${item.bc}04`}} onClick={()=>{if(hasBundleSub){if(item.type==="wellness")doWellness();else startCoach(item.type)}else setPw(true)}}>
+            <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
+              <div style={{width:48,height:48,borderRadius:14,background:`${item.bc}12`,border:`1px solid ${item.bc}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{item.emoji}</div>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                  <span style={{fontSize:16,fontWeight:700,color:"#fff"}}>{item.title}</span>
+                  <span style={{padding:"2px 8px",borderRadius:50,background:`${item.bc}15`,color:item.bc,fontSize:9,fontWeight:700}}>{item.badge}</span>
+                </div>
+                <p style={{fontSize:12,color:T.sub,margin:0,lineHeight:1.6}}>{item.desc}</p>
+                {item.quickQ&&<div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:10}}>
+                  {item.quickQ.map((q,j)=><span key={j} style={{fontSize:10,padding:"4px 10px",borderRadius:50,background:`${item.bc}10`,border:`1px solid ${item.bc}15`,color:item.bc}}>{q}</span>)}
+                </div>}
+              </div>
+            </div>
+          </Card>)}
+        </div>}
+      </div>}
+
+      {/* ═══════════════════════════════════════
+           TAB 5: 👤 MY
          ═══════════════════════════════════════ */}
       {pg==="myPage"&&<div style={page}>
         <PageTitle title="마이페이지"/>
@@ -1666,16 +1670,17 @@ export default function NuvoApp(){
         </Card>
       </div>}
 
-      {/* ═══ BOTTOM NAV (4-tab) ═══ */}
+      {/* ═══ BOTTOM NAV (5-tab) ═══ */}
       {pg!=="splash"&&pg!=="loading"&&<div style={{position:"fixed",bottom:0,left:0,right:0,background:`${T.bg}ee`,backdropFilter:"blur(16px)",borderTop:`1px solid ${T.border}`,zIndex:100,padding:"6px 0 env(safe-area-inset-bottom,6px)"}}>
         <div style={{maxWidth:480,margin:"0 auto",display:"flex",justifyContent:"space-around"}}>
           {[
             {k:"home",icon:"🏠",l:"홈",fn:goHome},
             {k:"fortune",icon:"🔮",l:"운세",fn:goFortune},
             {k:"briefing",icon:"📡",l:"브리핑",fn:goBriefing},
+            {k:"coach",icon:"💬",l:"코치",fn:goCoach},
             {k:"my",icon:"👤",l:"마이",fn:goMy},
-          ].map(t=><button key={t.k} onClick={t.fn} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:1,padding:"5px 16px",color:mainTab===t.k?T.purple:T.dim,fontSize:10}}>
-            <span style={{fontSize:22,opacity:mainTab===t.k?1:.35}}>{t.icon}</span>
+          ].map(t=><button key={t.k} onClick={t.fn} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:1,padding:"5px 10px",color:mainTab===t.k?T.purple:T.dim,fontSize:10}}>
+            <span style={{fontSize:20,opacity:mainTab===t.k?1:.35}}>{t.icon}</span>
             <span style={{fontWeight:mainTab===t.k?700:400,letterSpacing:"-0.01em"}}>{t.l}</span>
           </button>)}
         </div>
